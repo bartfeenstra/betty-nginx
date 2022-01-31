@@ -3,7 +3,7 @@
   "base_url": "http://example.com",
   "content_negotiation": true,
   "extensions": {
-    "betty.extension.nginx.Nginx": {
+    "betty_nginx.nginx.Nginx": {
       "configuration": {
         "www_directory_path": "/var/www/betty/"
       }

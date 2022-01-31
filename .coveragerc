@@ -1,9 +1,7 @@
 [run]
-source = betty
+source = betty_nginx
 omit =
-    betty/_package/*
-    betty/tests/*
-    betty/pytests/*
+    betty_nginx/tests/*
 
 [report]
 exclude_lines =

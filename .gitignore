@@ -2,19 +2,11 @@
 /.tox
 /venv
 
-# JavaScript development dependencies.
-/node_modules
-/package-lock.json
-
 # Python build artifacts.
-/betty.egg-info
+/betty_nginx.egg-info
 /build
 /dist
 *.pyc
 
-# PyInstaller build artifacts.
-
 # Test artifacts.
 /.coverage
-/cypress/screenshots
-/cypress/app

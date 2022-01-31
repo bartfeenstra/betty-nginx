@@ -6,8 +6,8 @@ cd "$(dirname "$0")/.."
 
 locale=$(echo "$1" | tr '-' '_')
 
-if [ -f "./betty/assets/locale/$locale/LC_MESSAGES/betty.po" ]; then
+if [ -f "./betty_nginx/assets/locale/$locale/LC_MESSAGES/betty_nginx.po" ]; then
   exit 0
 fi
 
-pybabel init --no-wrap -d ./betty/assets/locale -l "$locale" -D betty -i ./betty.pot
+pybabel init --no-wrap -d ./betty_nginx/assets/locale -l "$locale" -D betty_nginx -i ./betty_nginx/assets/betty_nginx.pot
