@@ -9,42 +9,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'Latest: Linux, Python 3.9 & Node.js 15'
+          - name: 'Latest: Linux, Python 3.9'
             os: ubuntu-latest
             python: '3.9'
-            node: '15'
           - name: 'Python 3.8'
             os: ubuntu-latest
             python: '3.8'
-            node: '15'
-          - name: 'Python 3.7'
-            os: ubuntu-latest
-            python: '3.7'
-            node: '15'
-          - name: 'Node.js 16'
-            os: ubuntu-latest
-            python: '3.9'
-            node: '16'
-          - name: 'Node.js 14'
-            os: ubuntu-latest
-            python: '3.9'
-            node: '14'
-          - name: 'Node.js 12'
-            os: ubuntu-latest
-            python: '3.9'
-            node: '12'
-          - name: 'Node.js 10'
-            os: ubuntu-latest
-            python: '3.9'
-            node: '10'
-          - name: 'Mac OS'
-            os: macos-latest
-            python: '3.9'
-            node: '15'
-          - name: 'Windows'
-            os: windows-latest
-            python: '3.9'
-            node: '15'
 
     steps:
       - name: Check out the source code
@@ -55,11 +25,6 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Set up Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }}
-
       - name: Install APT dependencies
         if: startsWith(runner.os, 'Linux')
         run: sudo apt-get install herbstluftwm libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxml2-dev libxslt1-dev xvfb
@@ -69,14 +34,6 @@ jobs:
         run: |
           herbstluftwm &
           sleep 1
-
-      - name: Install Homebrew dependencies
-        if: startsWith(runner.os, 'macOS')
-        run: brew install shellcheck
-
-      - name: Install Chocolatey dependencies
-        if: startsWith(runner.os, 'Windows')
-        run: choco install shellcheck
 
       - name: Build the development environment
         run: |
@@ -95,19 +52,6 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
-      - name: Get the npm cache directory path
-        id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Cache the npm cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
 
       - name: Run the tests
         run: |

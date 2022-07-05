@@ -1,0 +1,39 @@
+# Translations template for Nginx for Betty.
+# Copyright (C) 2022 Bart Feenstra & contributors
+# This file is distributed under the same license as the Nginx for Betty
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Nginx for Betty VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-06-20 08:50+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: betty_nginx/config.py:21
+msgid "Nginx configuration must be a mapping (dictionary)."
+msgstr ""
+
+#: betty_nginx/config.py:26
+msgid "The WWW directory must be a string or left empty."
+msgstr ""
+
+#: betty_nginx/config.py:32
+msgid "HTTPS must be a boolean or left empty."
+msgstr ""
+
+#: betty_nginx/nginx.py:56
+msgid ""
+"Generate <a href=\"https://nginx.org/\">nginx</a> configuration for your "
+"site, as well as a <code>Dockerfile</code> to build a <a "
+"href=\"https://www.docker.com/\">Docker</a> container around it."
+msgstr ""
+
