@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo 'Running pytest...'
+
+coverage erase
+COVERAGE_PROCESS_START="$(pwd)/.coveragerc" coverage run --module pytest "$@"
+coverage combine
+coverage report --skip-covered --skip-empty

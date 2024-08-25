@@ -1,0 +1,47 @@
+name: Build setuptools artifacts (Release)
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  setuptools:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: 'Python 3.12'
+            os: ubuntu-latest
+            python: '3.12'
+    steps:
+      - name: Check out the source code
+        uses: actions/checkout@v4
+
+      - name: Get the pip cache directory
+        run: echo "pip_cache_dir=$(pip cache dir)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.pip_cache_dir }}
+          key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('./setup.py') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ matribx.python }}-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Build the distributions
+        run: ./bin/build-setuptools '${{ github.event.release.tag_name }}'
+        shell: bash
+
+      - name: Publish the distributions to PyPI
+        run: twine upload -u __token__ ./dist/*
+        shell: bash
+        env:
+          TWINE_NON_INTERACTIVE: true
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}

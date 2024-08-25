@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [ "$#" -ne 1 ]
+then
+  echo "This command takes a single argument, which is the version to release."
+  exit 1
+fi
+
+# Temporarily update pyproject.toml with the build version.
+original_pyproject=$(cat ./pyproject.toml)
+# shellcheck disable=SC2001
+echo "$original_pyproject" | sed "s/^version = '0.0.0'$/version = '$1'/g" > ./pyproject.toml
+
+# Install Python dependencies.
+pip install -e '.[setuptools]'
+
+# Prepare the workspace directories.
+./bin/clean-build
+
+# Build the package.
+python setup.py sdist
+python setup.py bdist_wheel
+twine check ./dist/*
+
+# Clean up.
+echo "$original_pyproject" > ./pyproject.toml

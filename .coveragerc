@@ -1,0 +1,19 @@
+[run]
+branch = True
+concurrency =
+    multiprocessing
+    thread
+parallel = True
+source = betty_nginx
+
+[report]
+exclude_also =
+    ^\s*pragma: no cover$
+    ^\s*def __repr__
+    if TYPE_CHECKING:
+    @abstractmethod
+    @overload
+    raise NotImplementedError
+show_missing = True
+skip_covered = True
+skip_empty = True

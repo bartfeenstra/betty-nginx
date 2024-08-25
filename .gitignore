@@ -1,0 +1,11 @@
+# Python build artifacts.
+__pycache__
+/betty_nginx.egg-info
+/build
+/dist
+*.pyc
+*.pyc.*
+
+# Test artifacts.
+/.coverage
+/.coverage.*
