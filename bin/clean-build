@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+rm -rf ./build
+rm -rf ./dist
+rm -rf ./betty_nginx.egg-info

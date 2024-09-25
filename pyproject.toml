@@ -1,0 +1,105 @@
+[build-system]
+requires = [
+    'setuptools ~= 72.1',
+]
+build-backend = 'setuptools.build_meta'
+
+[project]
+version = '0.0.0'
+name = 'betty_nginx'
+description = 'Nginx for Betty provides nginx and Docker integration for your Betty sites'
+readme = 'README.md'
+license = {file = 'LICENSE.txt'}
+authors = [
+  {name = 'Bart Feenstra', email = 'bar@bartfeenstra.com'},
+]
+requires-python = '~= 3.11'
+dependencies = [
+    'betty ~= 0.4.0a11',
+    'docker ~= 7.1',
+]
+classifiers = [
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Lua',
+    'Programming Language :: Unix Shell',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: POSIX :: Linux',
+    'Operating System :: Microsoft :: Windows',
+    'Topic :: Internet',
+    'Topic :: Scientific/Engineering :: Visualization',
+    'Topic :: Sociology :: Genealogy',
+    'Topic :: Sociology :: History',
+    'Topic :: Software Development :: Code Generators',
+    'Natural Language :: Dutch',
+    'Natural Language :: English',
+    'Natural Language :: French',
+    'Natural Language :: German',
+    'Natural Language :: Ukrainian',
+    'Typing :: Typed ',
+]
+
+[project.urls]
+Github = 'https://github.com/bartfeenstra/betty_nginx'
+Twitter = 'https://twitter.com/BettyProject'
+X = 'https://twitter.com/BettyProject'
+
+[project.entry-points.'betty.command']
+'nginx-serve' = 'betty_nginx._cli:nginx_serve'
+
+[project.entry-points.'betty.extension']
+'betty-nginx' = 'betty_nginx:Nginx'
+
+[project.optional-dependencies]
+setuptools = [
+    'twine ~= 5.1',
+    'wheel ~= 0.43',
+]
+test = [
+    'basedmypy ~= 2.5',
+    'coverage ~= 7.6',
+    'html5lib ~= 1.1',
+    'pytest ~= 8.3',
+    'pytest-asyncio ~= 0.23',
+    'pytest-mock ~= 3.14',
+    'ruff ~= 0.5',
+    'types-aiofiles ~= 24.1',
+    'types-html5lib ~= 1.1',
+    'types-requests ~= 2.32',
+    'virtualenv ~= 20.26',
+    'betty_nginx[setuptools]',
+]
+development = [
+    'pytest-repeat ~= 0.9',
+    'betty_nginx[test]',
+]
+ci = [
+    'codecov ~= 2.1',
+    'betty_nginx[test]',
+]
+
+[tool.setuptools.packages.find]
+where = ['.']
+exclude = [
+    'betty_nginx.tests',
+    'betty_nginx.tests.*',
+]
+
+[tool.setuptools.package-data]
+betty_nginx = [
+    'py.typed',
+
+    # Assets.
+    'assets/**',
+    'extension/*/assets/**',
+]
+
+[tool.setuptools.exclude-package-data]
+betty_nginx = [
+    '__pycache__',
+]

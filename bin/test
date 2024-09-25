@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+./bin/clean-build
+
+if [ -z "${BETTY_NGINX_TEST_SKIP_SHELLCHECK-}" ]; then
+  ./bin/test-shellcheck
+fi
+./bin/test-ruff
+./bin/test-mypy
+if [ -z "${BETTY_NGINX_TEST_SKIP_BUSTED-}" ]; then
+  ./bin/test-busted
+fi
+./bin/test-pytest
+./bin/test-build-setuptools
