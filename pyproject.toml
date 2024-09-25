@@ -45,7 +45,7 @@ classifiers = [
 ]
 
 [project.urls]
-Github = 'https://github.com/bartfeenstra/betty_nginx'
+Github = 'https://github.com/bartfeenstra/betty-nginx'
 Twitter = 'https://twitter.com/BettyProject'
 X = 'https://twitter.com/BettyProject'
 
