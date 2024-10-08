@@ -46,7 +46,9 @@ class TestDockerizedNginxServer:
                 project.configuration.www_directory_path / "index.html", "w"
             ) as f:
                 await f.write(content)
-            async with project, DockerizedNginxServer(project) as server:
+            async with project, await DockerizedNginxServer.new_for_project(
+                project
+            ) as server:
                 await Do(requests.get, server.public_url).until(_assert_response)
 
     async def test_public_url_unstarted(self) -> None:
@@ -55,7 +57,7 @@ class TestDockerizedNginxServer:
         ) as project:
             project.configuration.extensions.enable(Nginx)
             async with project:
-                sut = DockerizedNginxServer(project)
+                sut = await DockerizedNginxServer.new_for_project(project)
                 with pytest.raises(NoPublicUrlBecauseServerNotStartedError):
                     sut.public_url  # noqa B018
 
@@ -67,7 +69,7 @@ class TestDockerizedNginxServer:
         ) as project:
             project.configuration.extensions.enable(Nginx)
             async with project:
-                sut = DockerizedNginxServer(project)
+                sut = await DockerizedNginxServer.new_for_project(project)
                 assert sut.is_available()
 
     async def test_is_available_is_unavailable(self, mocker: MockerFixture) -> None:
@@ -78,6 +80,6 @@ class TestDockerizedNginxServer:
         ) as project:
             project.configuration.extensions.enable(Nginx)
             async with project:
-                sut = DockerizedNginxServer(project)
+                sut = await DockerizedNginxServer.new_for_project(project)
 
                 assert not sut.is_available()

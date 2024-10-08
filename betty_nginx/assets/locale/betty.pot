@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Betty VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-09-25 11:45+0100\n"
+"POT-Creation-Date: 2024-10-08 12:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,5 +18,8 @@ msgstr ""
 "Generated-By: Babel 2.16.0\n"
 
 msgid "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
+msgstr ""
+
+msgid "Serve a generated site with nginx in a Docker container."
 msgstr ""
 

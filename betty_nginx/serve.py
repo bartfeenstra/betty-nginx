@@ -5,36 +5,40 @@ Integrate the nginx extension with Betty's Serve API.
 import logging
 from contextlib import AsyncExitStack
 from pathlib import Path
-from typing import final
+from typing import final, Self
 
 import docker
 from aiofiles.os import makedirs
 from aiofiles.tempfile import TemporaryDirectory
+from betty.locale.localizer import Localizer
 from betty.project import Project
+from betty.project.factory import ProjectDependentFactory
 from betty.serve import NoPublicUrlBecauseServerNotStartedError, Server
 from docker.errors import DockerException
 from typing_extensions import override
 
 from betty_nginx import Nginx
-from betty_nginx.artifact import (
-    generate_dockerfile_file,
-    generate_configuration_file,
-)
+from betty_nginx.artifact import generate_dockerfile_file, generate_configuration_file
 from betty_nginx.config import NginxConfiguration
 from betty_nginx.docker import Container
 
 
 @final
-class DockerizedNginxServer(Server):
+class DockerizedNginxServer(ProjectDependentFactory, Server):
     """
     An nginx server that runs within a Docker container.
     """
 
-    def __init__(self, project: Project) -> None:
-        super().__init__(project.app.localizer)
+    def __init__(self, localizer: Localizer, project: Project) -> None:
+        super().__init__(localizer)
         self._project = project
         self._exit_stack = AsyncExitStack()
         self._container: Container | None = None
+
+    @override
+    @classmethod
+    async def new_for_project(cls, project: Project) -> Self:
+        return cls(await project.app.localizer, project)
 
     @override
     async def start(self) -> None:

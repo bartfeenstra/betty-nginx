@@ -38,7 +38,9 @@ class TestNginx:
             project.configuration.update(configuration)
             async with project:
                 await generate.generate(project)
-                async with DockerizedNginxServer(project) as server:
+                async with await DockerizedNginxServer.new_for_project(
+                    project
+                ) as server:
                     yield server
 
     async def assert_betty_html(self, response: Response) -> None:
@@ -53,12 +55,12 @@ class TestNginx:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project, project:
-            schema = await ProjectSchema.new(project)
+            schema = await ProjectSchema.new_for_project(project)
             schema.validate(data)
 
     @pytest.fixture
-    def monolingual_configuration(self, tmp_path: Path) -> ProjectConfiguration:
-        return ProjectConfiguration(
+    async def monolingual_configuration(self, tmp_path: Path) -> ProjectConfiguration:
+        return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
                 ExtensionConfiguration(
@@ -71,10 +73,10 @@ class TestNginx:
         )
 
     @pytest.fixture
-    def monolingual_clean_urls_configuration(
+    async def monolingual_clean_urls_configuration(
         self, tmp_path: Path
     ) -> ProjectConfiguration:
-        return ProjectConfiguration(
+        return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
                 ExtensionConfiguration(
@@ -88,8 +90,8 @@ class TestNginx:
         )
 
     @pytest.fixture
-    def multilingual_configuration(self, tmp_path: Path) -> ProjectConfiguration:
-        return ProjectConfiguration(
+    async def multilingual_configuration(self, tmp_path: Path) -> ProjectConfiguration:
+        return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
                 ExtensionConfiguration(
@@ -112,10 +114,10 @@ class TestNginx:
         )
 
     @pytest.fixture
-    def multilingual_clean_urls_configuration(
+    async def multilingual_clean_urls_configuration(
         self, tmp_path: Path
     ) -> ProjectConfiguration:
-        return ProjectConfiguration(
+        return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
                 ExtensionConfiguration(
