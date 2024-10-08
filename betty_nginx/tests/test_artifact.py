@@ -6,10 +6,7 @@ from betty.project import Project
 from betty.project.config import ExtensionConfiguration, LocaleConfiguration
 
 from betty_nginx import Nginx
-from betty_nginx.artifact import (
-    generate_configuration_file,
-    generate_dockerfile_file,
-)
+from betty_nginx.artifact import generate_configuration_file, generate_dockerfile_file
 from betty_nginx.config import NginxConfiguration
 
 

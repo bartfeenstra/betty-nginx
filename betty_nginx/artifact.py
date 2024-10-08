@@ -25,7 +25,8 @@ async def generate_configuration_file(
     """
     from betty_nginx import Nginx
 
-    nginx = project.extensions[Nginx.plugin_id()]
+    extensions = await project.extensions
+    nginx = extensions[Nginx]
     assert isinstance(nginx, Nginx)
     data = {
         "server_name": urlparse(project.configuration.base_url).netloc,
@@ -42,10 +43,9 @@ async def generate_configuration_file(
         .relative_to(root_path)
         .parts
     )
+    jinja2_environment = await project.jinja2_environment
     template = FileSystemLoader(root_path).load(
-        project.jinja2_environment,
-        configuration_file_template_name,
-        project.jinja2_environment.globals,
+        jinja2_environment, configuration_file_template_name, jinja2_environment.globals
     )
     await makedirs(destination_file_path.parent, exist_ok=True)
     configuration_file_contents = await template.render_async(data)

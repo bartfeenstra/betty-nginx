@@ -15,7 +15,7 @@ authors = [
 ]
 requires-python = '~= 3.11'
 dependencies = [
-    'betty ~= 0.4.0a11',
+    'betty ~= 0.4.0a12',
     'docker ~= 7.1',
 ]
 classifiers = [
@@ -50,7 +50,7 @@ Twitter = 'https://twitter.com/BettyProject'
 X = 'https://twitter.com/BettyProject'
 
 [project.entry-points.'betty.command']
-'nginx-serve' = 'betty_nginx._cli:nginx_serve'
+'nginx-serve' = 'betty_nginx._cli:NginxServe'
 
 [project.entry-points.'betty.extension']
 'betty-nginx' = 'betty_nginx:Nginx'

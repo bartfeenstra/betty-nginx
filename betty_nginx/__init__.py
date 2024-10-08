@@ -10,10 +10,7 @@ from betty.project.extension import ConfigurableExtension
 from betty.project.generate import GenerateSiteEvent
 from typing_extensions import override
 
-from betty_nginx.artifact import (
-    generate_configuration_file,
-    generate_dockerfile_file,
-)
+from betty_nginx.artifact import generate_configuration_file, generate_dockerfile_file
 from betty_nginx.config import NginxConfiguration
 
 
