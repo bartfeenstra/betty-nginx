@@ -28,7 +28,7 @@ jobs:
           path: ${{ env.pip_cache_dir }}
           key: pip-${{ runner.os }}-${{ matrix.python }}-${{ hashFiles('./setup.py') }}
           restore-keys: |
-            pip-${{ runner.os }}-${{ matribx.python }}-
+            pip-${{ runner.os }}-${{ matrix.python }}-
 
       - name: Set up Python
         uses: actions/setup-python@v5
