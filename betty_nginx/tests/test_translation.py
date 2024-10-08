@@ -16,7 +16,7 @@ class TestPotFile(PotFileTestBase):
 
     @override
     def command(self) -> str:
-        return "betty extension-update-translations betty-nginx ./betty_nginx"  # pragma: no cover
+        return "betty extension-update-translations nginx ./betty_nginx"  # pragma: no cover
 
     @override
     async def update_translations(
