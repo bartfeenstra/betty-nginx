@@ -28,7 +28,7 @@ class Nginx(ConfigurableExtension[NginxConfiguration]):
     @override
     @classmethod
     def plugin_id(cls) -> MachineName:
-        return "betty-nginx"
+        return "nginx"
 
     @override
     @classmethod

@@ -54,7 +54,7 @@ X = 'https://twitter.com/BettyProject'
 'nginx-serve' = 'betty_nginx._cli:NginxServe'
 
 [project.entry-points.'betty.extension']
-'betty-nginx' = 'betty_nginx:Nginx'
+'nginx' = 'betty_nginx:Nginx'
 
 [project.optional-dependencies]
 setuptools = [
