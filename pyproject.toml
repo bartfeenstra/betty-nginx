@@ -50,6 +50,11 @@ Github = 'https://github.com/bartfeenstra/betty-nginx'
 Twitter = 'https://twitter.com/BettyProject'
 X = 'https://twitter.com/BettyProject'
 
+[project.urls]
+Github = 'https://github.com/bartfeenstra/betty-nginx'
+Twitter = 'https://twitter.com/BettyProject'
+X = 'https://twitter.com/BettyProject'
+
 [project.entry-points.'betty.command']
 'nginx-serve' = 'betty_nginx._cli:NginxServe'
 
