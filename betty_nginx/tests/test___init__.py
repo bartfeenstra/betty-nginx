@@ -8,7 +8,7 @@ from typing_extensions import override
 from betty_nginx import Nginx
 
 
-class TestNginx(ExtensionTestBase):
+class TestNginx(ExtensionTestBase[Nginx]):
     @override
     def get_sut_class(self) -> type[Nginx]:
         return Nginx
