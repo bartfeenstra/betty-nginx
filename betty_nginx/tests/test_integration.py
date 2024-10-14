@@ -35,7 +35,7 @@ class TestNginx:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            project.configuration.update(configuration)
+            project.configuration.load(configuration.dump())
             async with project:
                 await generate.generate(project)
                 async with await DockerizedNginxServer.new_for_project(

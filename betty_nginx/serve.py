@@ -56,7 +56,7 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
         isolated_project.configuration.configuration_file_path = (
             self._project.configuration.configuration_file_path
         )
-        isolated_project.configuration.update(self._project.configuration)
+        isolated_project.configuration.load(self._project.configuration.dump())
         isolated_project.configuration.debug = True
 
         # Work around https://github.com/bartfeenstra/betty/issues/1056.

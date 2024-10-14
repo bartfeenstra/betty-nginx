@@ -1,7 +1,5 @@
 """Integrate Betty with `nginx <https://nginx.org/>`_."""
 
-from typing import Self
-
 from betty.assertion import (
     OptionalField,
     assert_record,
@@ -12,8 +10,7 @@ from betty.assertion import (
     assert_str,
 )
 from betty.config import Configuration
-from betty.serde.dump import Dump, minimize
-from betty.typing import Void, Voidable
+from betty.serde.dump import Dump
 from typing_extensions import override
 
 
@@ -58,11 +55,6 @@ class NginxConfiguration(Configuration):
         self._www_directory_path = www_directory_path
 
     @override
-    def update(self, other: Self) -> None:
-        self._https = other._https
-        self._www_directory_path = other._www_directory_path
-
-    @override
     def load(self, dump: Dump) -> None:
         assert_record(
             OptionalField(
@@ -70,19 +62,21 @@ class NginxConfiguration(Configuration):
                 assert_or(assert_bool(), assert_none()) | assert_setattr(self, "https"),
             ),
             OptionalField(
-                "www_directory_path",
-                assert_str() | assert_setattr(self, "www_directory_path"),
+                "www_directory",
+                assert_or(
+                    assert_none(),
+                    assert_str() | assert_setattr(self, "www_directory_path"),
+                ),
             ),
         )(dump)
 
     @override
-    def dump(self) -> Voidable[Dump]:
-        dump = {
+    def dump(self) -> Dump:
+        return {
             "https": self.https,
-            "www_directory_path": (
-                Void
+            "www_directory": (
+                None
                 if self.www_directory_path is None
                 else str(self.www_directory_path)
             ),
         }
-        return minimize(dump, True)

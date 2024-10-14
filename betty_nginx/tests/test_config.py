@@ -38,19 +38,26 @@ class TestNginxConfiguration:
         sut.load(dump)
         assert sut.https == https
 
-    async def test_load_with_www_directory_path(self, tmp_path: Path) -> None:
-        www_directory_path = str(tmp_path)
+    @pytest.mark.parametrize(
+        "www_directory",
+        [
+            None,
+            "/var/www",
+        ],
+    )
+    async def test_load_with_www_directory(self, www_directory: str | None) -> None:
         dump: Dump = {
-            "www_directory_path": www_directory_path,
+            "www_directory": www_directory,
         }
         sut = NginxConfiguration()
         sut.load(dump)
-        assert sut.www_directory_path == www_directory_path
+        assert sut.www_directory_path == www_directory
 
     async def test_dump_with_minimal_configuration(self) -> None:
         sut = NginxConfiguration()
         expected = {
             "https": None,
+            "www_directory": None,
         }
         assert sut.dump() == expected
 
@@ -60,16 +67,6 @@ class TestNginxConfiguration:
         sut.www_directory_path = www_directory_path
         expected = {
             "https": None,
-            "www_directory_path": www_directory_path,
+            "www_directory": www_directory_path,
         }
         assert sut.dump() == expected
-
-    async def test_update(self, tmp_path: Path) -> None:
-        www_directory_path = str(tmp_path)
-        sut = NginxConfiguration()
-        other = NginxConfiguration()
-        other.https = True
-        other.www_directory_path = www_directory_path
-        sut.update(other)
-        assert sut.https is True
-        assert sut.www_directory_path == www_directory_path
