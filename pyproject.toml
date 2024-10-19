@@ -15,7 +15,7 @@ authors = [
 ]
 requires-python = '~= 3.11'
 dependencies = [
-    'betty == 0.4.0a13',
+    'betty == 0.4.0a14',
     'docker ~= 7.1',
 ]
 classifiers = [
