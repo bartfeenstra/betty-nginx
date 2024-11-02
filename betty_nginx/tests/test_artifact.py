@@ -3,7 +3,8 @@ from typing import Optional
 
 from betty.app import App
 from betty.project import Project
-from betty.project.config import ExtensionConfiguration, LocaleConfiguration
+from betty.project.config import LocaleConfiguration
+from betty.plugin.config import PluginInstanceConfiguration
 
 from betty_nginx import Nginx
 from betty_nginx.artifact import generate_configuration_file, generate_dockerfile_file
@@ -40,7 +41,7 @@ class TestGenerateConfigurationFile:
     async def test(self, new_temporary_app: App):
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "http://example.com"
-            project.configuration.extensions.append(ExtensionConfiguration(Nginx))
+            await project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -88,7 +89,7 @@ server {
                     alias="nl",
                 ),
             )
-            project.configuration.extensions.append(ExtensionConfiguration(Nginx))
+            await project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -168,7 +169,7 @@ server {
                     alias="nl",
                 ),
             )
-            project.configuration.extensions.append(ExtensionConfiguration(Nginx))
+            await project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -254,7 +255,7 @@ server {
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.clean_urls = True
-            project.configuration.extensions.append(ExtensionConfiguration(Nginx))
+            await project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -298,7 +299,7 @@ server {
     async def test_with_https(self, new_temporary_app: App) -> None:
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "https://example.com"
-            project.configuration.extensions.append(ExtensionConfiguration(Nginx))
+            await project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -342,9 +343,9 @@ server {
     async def test_with_overridden_www_directory_path(self, new_temporary_app: App):
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.extensions.append(
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/tmp/overridden-www",
                     ),
                 )
@@ -391,9 +392,9 @@ class TestGenerateDockerfileFile:
     async def test(self, new_temporary_app: App) -> None:
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.extensions.append(
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/tmp/overridden-www",
                     ),
                 )
