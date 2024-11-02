@@ -14,7 +14,7 @@ class TestServe:
         mocker.patch("asyncio.sleep", side_effect=KeyboardInterrupt)
         mocker.patch("betty_nginx.serve.DockerizedNginxServer", new=NoOpProjectServer)
         async with Project.new_temporary(new_temporary_app) as project:
-            project.configuration.extensions.enable(Nginx)
+            await project.configuration.extensions.enable(Nginx)
 
             await write_configuration_file(
                 project.configuration, project.configuration.configuration_file_path

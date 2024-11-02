@@ -8,13 +8,10 @@ import pytest
 import requests
 from betty.app import App
 from betty.functools import Do
+from betty.plugin.config import PluginInstanceConfiguration
 from betty.project import Project, ProjectSchema
 from betty.project import generate
-from betty.project.config import (
-    ExtensionConfiguration,
-    LocaleConfiguration,
-    ProjectConfiguration,
-)
+from betty.project.config import LocaleConfiguration, ProjectConfiguration
 from betty.serve import Server
 from requests import Response
 
@@ -63,9 +60,9 @@ class TestNginx:
         return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/var/www/betty/"
                     ),
                 ),
@@ -79,9 +76,9 @@ class TestNginx:
         return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/var/www/betty/"
                     ),
                 ),
@@ -94,9 +91,9 @@ class TestNginx:
         return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/var/www/betty/"
                     ),
                 ),
@@ -120,9 +117,9 @@ class TestNginx:
         return await ProjectConfiguration.new(
             tmp_path / "betty.json",
             extensions=[
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/var/www/betty/"
                     ),
                 ),

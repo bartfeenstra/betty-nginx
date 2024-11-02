@@ -6,8 +6,8 @@ import requests
 from aiofiles.os import makedirs
 from betty.app import App
 from betty.functools import Do
+from betty.plugin.config import PluginInstanceConfiguration
 from betty.project import Project
-from betty.project.config import ExtensionConfiguration
 from betty.serve import NoPublicUrlBecauseServerNotStartedError
 from docker.errors import DockerException
 from pytest_mock import MockerFixture
@@ -34,9 +34,9 @@ class TestDockerizedNginxServer:
             app
         ) as project:
             project.configuration.extensions.append(
-                ExtensionConfiguration(
+                PluginInstanceConfiguration(
                     Nginx,
-                    extension_configuration=NginxConfiguration(
+                    configuration=NginxConfiguration(
                         www_directory_path="/var/www/betty"
                     ),
                 )
@@ -55,7 +55,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            project.configuration.extensions.enable(Nginx)
+            await project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
                 with pytest.raises(NoPublicUrlBecauseServerNotStartedError):
@@ -67,7 +67,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            project.configuration.extensions.enable(Nginx)
+            await project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
                 assert sut.is_available()
@@ -78,7 +78,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            project.configuration.extensions.enable(Nginx)
+            await project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
 

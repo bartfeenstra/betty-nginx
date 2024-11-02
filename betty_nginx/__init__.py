@@ -48,7 +48,7 @@ class Nginx(ConfigurableExtension[NginxConfiguration]):
 
     @override
     @classmethod
-    def default_configuration(cls) -> NginxConfiguration:
+    def new_default_configuration(cls) -> NginxConfiguration:
         return NginxConfiguration()
 
     @override

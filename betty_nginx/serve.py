@@ -3,6 +3,7 @@ Integrate the nginx extension with Betty's Serve API.
 """
 
 import logging
+from collections.abc import Mapping
 from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import final, Self
@@ -19,7 +20,6 @@ from typing_extensions import override
 
 from betty_nginx import Nginx
 from betty_nginx.artifact import generate_dockerfile_file, generate_configuration_file
-from betty_nginx.config import NginxConfiguration
 from betty_nginx.docker import Container
 
 
@@ -59,12 +59,12 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
         isolated_project.configuration.load(self._project.configuration.dump())
         isolated_project.configuration.debug = True
 
-        # Work around https://github.com/bartfeenstra/betty/issues/1056.
+        # Work around https://github.com/bartfeenstra/betty-nginx/issues/3.
         nginx_configuration = isolated_project.configuration.extensions[
             Nginx
-        ].extension_configuration
-        assert isinstance(nginx_configuration, NginxConfiguration)
-        nginx_configuration.https = False
+        ].configuration
+        assert isinstance(nginx_configuration, Mapping)
+        nginx_configuration["https"] = False
 
         await self._exit_stack.enter_async_context(isolated_project)
 
