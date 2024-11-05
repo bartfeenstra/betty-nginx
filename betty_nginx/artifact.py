@@ -9,9 +9,17 @@ from urllib.parse import urlparse
 
 import aiofiles
 from aiofiles.os import makedirs
-from betty.path import rootname
 from betty.project import Project
 from jinja2 import FileSystemLoader
+
+
+def _rootname(source_path: Path) -> Path:
+    root = source_path
+    while True:
+        possible_root = root.parent
+        if possible_root == root:
+            return root
+        root = possible_root
 
 
 async def generate_configuration_file(
@@ -37,7 +45,7 @@ async def generate_configuration_file(
         destination_file_path = (
             project.configuration.output_directory_path / "nginx" / "nginx.conf"
         )
-    root_path = rootname(Path(__file__))
+    root_path = _rootname(Path(__file__))
     configuration_file_template_name = "/".join(
         (Path(__file__).parent / "assets" / "nginx.conf.j2")
         .relative_to(root_path)

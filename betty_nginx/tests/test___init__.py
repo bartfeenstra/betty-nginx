@@ -15,7 +15,7 @@ class TestNginx(ExtensionTestBase[Nginx]):
     async def test_generate(self, new_temporary_app: App):
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "http://example.com"
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             async with project:
                 await generate(project)
                 assert (
