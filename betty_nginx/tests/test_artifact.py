@@ -41,7 +41,7 @@ class TestGenerateConfigurationFile:
     async def test(self, new_temporary_app: App):
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "http://example.com"
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -89,7 +89,7 @@ server {
                     alias="nl",
                 ),
             )
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -169,7 +169,7 @@ server {
                     alias="nl",
                 ),
             )
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -255,7 +255,7 @@ server {
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.clean_urls = True
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {
@@ -299,7 +299,7 @@ server {
     async def test_with_https(self, new_temporary_app: App) -> None:
         async with Project.new_temporary(new_temporary_app) as project:
             project.configuration.url = "https://example.com"
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             expected = (
                 r"""
 server {

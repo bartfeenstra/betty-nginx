@@ -55,7 +55,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
                 with pytest.raises(NoPublicUrlBecauseServerNotStartedError):
@@ -67,7 +67,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
                 assert sut.is_available()
@@ -78,7 +78,7 @@ class TestDockerizedNginxServer:
         async with App.new_temporary() as app, app, Project.new_temporary(
             app
         ) as project:
-            await project.configuration.extensions.enable(Nginx)
+            project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
 
