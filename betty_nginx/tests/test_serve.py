@@ -30,9 +30,11 @@ class TestDockerizedNginxServer:
             assert response.headers["Cache-Control"] == "no-cache"
 
         content = "Hello, and welcome to my site!"
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+        ):
             project.configuration.extensions.append(
                 PluginInstanceConfiguration(
                     Nginx,
@@ -46,15 +48,18 @@ class TestDockerizedNginxServer:
                 project.configuration.www_directory_path / "index.html", "w"
             ) as f:
                 await f.write(content)
-            async with project, await DockerizedNginxServer.new_for_project(
-                project
-            ) as server:
+            async with (
+                project,
+                await DockerizedNginxServer.new_for_project(project) as server,
+            ):
                 await Do(requests.get, server.public_url).until(_assert_response)
 
     async def test_public_url_unstarted(self) -> None:
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+        ):
             project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
@@ -64,9 +69,11 @@ class TestDockerizedNginxServer:
     async def test_is_available_is_available(self, mocker: MockerFixture) -> None:
         m_from_env = mocker.patch("docker.from_env")
         m_from_env.return_value = mocker.Mock("docker.client.DockerClient")
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+        ):
             project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
@@ -75,9 +82,11 @@ class TestDockerizedNginxServer:
     async def test_is_available_is_unavailable(self, mocker: MockerFixture) -> None:
         m_from_env = mocker.patch("docker.from_env")
         m_from_env.side_effect = DockerException()
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+        ):
             project.configuration.extensions.enable(Nginx)
             async with project:
                 sut = await DockerizedNginxServer.new_for_project(project)
