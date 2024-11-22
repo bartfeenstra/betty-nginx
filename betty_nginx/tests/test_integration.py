@@ -29,9 +29,11 @@ class TestNginx:
     async def server(
         self, configuration: ProjectConfiguration
     ) -> AsyncIterator[Server]:
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+        ):
             project.configuration.load(configuration.dump())
             async with project:
                 await generate.generate(project)
@@ -49,9 +51,12 @@ class TestNginx:
     async def assert_betty_json(self, response: Response) -> None:
         assert response.headers["Content-Type"] == "application/json"
         data = response.json()
-        async with App.new_temporary() as app, app, Project.new_temporary(
-            app
-        ) as project, project:
+        async with (
+            App.new_temporary() as app,
+            app,
+            Project.new_temporary(app) as project,
+            project,
+        ):
             schema = await ProjectSchema.new_for_project(project)
             schema.validate(data)
 
