@@ -58,7 +58,7 @@ X = 'https://twitter.com/BettyProject'
 
 [project.optional-dependencies]
 setuptools = [
-    'twine ~= 5.1',
+    'twine >= 5.1,< 7.0',
     'wheel ~= 0.43',
 ]
 test = [
