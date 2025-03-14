@@ -90,7 +90,7 @@ class Container:
         The container's public IP address.
         """
         return cast(
-            str,
+            "str",
             self._client.api.inspect_container(self._container.id)["NetworkSettings"][
                 "Networks"
             ]["bridge"]["IPAddress"],
