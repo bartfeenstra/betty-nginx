@@ -11,7 +11,6 @@ from typing import final, Self
 import docker
 from aiofiles.os import makedirs
 from aiofiles.tempfile import TemporaryDirectory
-from betty.locale.localizer import Localizer
 from betty.project import Project
 from betty.project.factory import ProjectDependentFactory
 from betty.serve import NoPublicUrlBecauseServerNotStartedError, Server
@@ -29,8 +28,8 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
     An nginx server that runs within a Docker container.
     """
 
-    def __init__(self, localizer: Localizer, project: Project) -> None:
-        super().__init__(localizer)
+    def __init__(self, project: Project) -> None:
+        super().__init__(user=project.app.user)
         self._project = project
         self._exit_stack = AsyncExitStack()
         self._container: Container | None = None
@@ -38,7 +37,7 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
     @override
     @classmethod
     async def new_for_project(cls, project: Project) -> Self:
-        return cls(await project.app.localizer, project)
+        return cls(project)
 
     @override
     async def start(self) -> None:
