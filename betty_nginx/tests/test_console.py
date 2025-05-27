@@ -1,8 +1,9 @@
 from aiofiles.os import makedirs
+from betty.console import SystemExitCode
 from betty.app import App
 from betty.config import write_configuration_file
 from betty.project import Project
-from betty.test_utils.cli import run
+from betty.test_utils.console import run
 from betty.test_utils.serve import NoOpProjectServer
 from pytest_mock import MockerFixture
 
@@ -24,7 +25,7 @@ class TestServe:
                 await run(
                     new_temporary_app,
                     "nginx-serve",
-                    "-c",
+                    "-p",
                     str(project.configuration.configuration_file_path),
-                    expected_exit_code=1,
+                    expected_exit_code=SystemExitCode.USER_QUIT,
                 )
