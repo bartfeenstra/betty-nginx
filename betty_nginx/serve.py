@@ -46,7 +46,7 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
         await makedirs(self._project.configuration.www_directory_path, exist_ok=True)
 
         output_directory_path_str: str = await self._exit_stack.enter_async_context(
-            TemporaryDirectory()  # type: ignore[arg-type]
+            TemporaryDirectory()
         )
 
         isolated_project: Project = await self._exit_stack.enter_async_context(
