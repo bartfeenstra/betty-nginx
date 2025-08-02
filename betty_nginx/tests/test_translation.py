@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from betty.locale.translation import update_extension_translations
+from betty.locale.translation.project.extension import update_extension_translations
 from betty.test_utils.locale import PotFileTestBase
 from typing_extensions import override
 
