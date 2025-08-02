@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
 import pytest
-from betty.assertion.error import AssertionFailed
-from betty.test_utils.assertion.error import raises_error
+from betty.exception import UserFacingException
+from betty.test_utils.exception import raises_error
 
 from betty_nginx.config import NginxConfiguration
 
@@ -19,7 +19,7 @@ class TestNginxConfiguration:
 
     async def test_load_without_dict_should_error(self) -> None:
         dump = None
-        with raises_error(error_type=AssertionFailed):
+        with raises_error(error_type=UserFacingException):
             NginxConfiguration().load(dump)
 
     @pytest.mark.parametrize(
