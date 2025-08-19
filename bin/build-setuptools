@@ -22,8 +22,7 @@ pip install -e '.[setuptools]'
 ./bin/clean-build
 
 # Build the package.
-python setup.py sdist
-python setup.py bdist_wheel
+python -m build
 twine check ./dist/*
 
 # Clean up.

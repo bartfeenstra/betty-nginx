@@ -58,8 +58,9 @@ X = 'https://twitter.com/BettyProject'
 
 [project.optional-dependencies]
 setuptools = [
+    'build ~= 1.3',
     'twine ~= 6.0',
-    'wheel ~= 0.43',
+    'wheel ~= 0.45.1',
 ]
 test = [
     'basedmypy ~= 2.5',
