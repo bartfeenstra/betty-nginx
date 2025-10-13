@@ -18,6 +18,9 @@ jobs:
         include:
           # The number of builds that submit code coverage configured here MUST be identical
           # to the number of `after_n_builds` in ./codecov.yml.
+          - name: 'Python 3.14'
+            os: ubuntu-latest
+            python: '3.14'
           - name: 'Python 3.13'
             os: ubuntu-latest
             python: '3.13'
@@ -29,10 +32,10 @@ jobs:
             python: '3.11'
           - name: 'macOS'
             os: macos-latest
-            python: '3.13'
+            python: '3.14'
           - name: 'Windows'
             os: windows-latest
-            python: '3.13'
+            python: '3.14'
     timeout-minutes: 60
     steps:
       - name: Check out the source code
