@@ -6,12 +6,17 @@ from pathlib import Path
 import html5lib
 import pytest
 import requests
+from betty.ancestry.place import Place
 from betty.app import App
 from betty.functools import Do
 from betty.plugin.config import PluginInstanceConfiguration
 from betty.project import Project, ProjectSchema
 from betty.project import generate
-from betty.project.config import LocaleConfiguration, ProjectConfiguration
+from betty.project.config import (
+    LocaleConfiguration,
+    ProjectConfiguration,
+    EntityTypeConfiguration,
+)
 from betty.serve import Server
 from requests import Response
 
@@ -245,6 +250,9 @@ class TestNginx:
     async def test_default_html_resource(
         self, monolingual_clean_urls_configuration: ProjectConfiguration
     ):
+        monolingual_clean_urls_configuration.entity_types.append(
+            EntityTypeConfiguration(Place, generate_html_list=True)
+        )
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(requests.get, f"{server.public_url}/place/").until(
                 self._build_assert_status_code(200),
@@ -254,6 +262,9 @@ class TestNginx:
     async def test_negotiated_html_resource(
         self, monolingual_clean_urls_configuration: ProjectConfiguration
     ):
+        monolingual_clean_urls_configuration.entity_types.append(
+            EntityTypeConfiguration(Place, generate_html_list=True)
+        )
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(
                 requests.get,

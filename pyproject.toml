@@ -15,7 +15,8 @@ authors = [
 ]
 requires-python = '~= 3.11'
 dependencies = [
-    'betty == 0.5.0a12',
+    'aiofiles ~= 25.1',
+    'betty == 0.5.0a13',
     'docker ~= 7.1',
 ]
 classifiers = [
@@ -52,10 +53,10 @@ Twitter = 'https://twitter.com/BettyProject'
 X = 'https://twitter.com/BettyProject'
 
 [project.entry-points.'betty.command']
-'nginx-serve' = 'betty_nginx._console:NginxServe'
+'nginx-serve' = 'betty_nginx._console:NginxServe.plugin'
 
 [project.entry-points.'betty.extension']
-'nginx' = 'betty_nginx:Nginx'
+'nginx' = 'betty_nginx:Nginx.plugin'
 
 [project.optional-dependencies]
 setuptools = [
@@ -71,7 +72,7 @@ test = [
     'pytest-asyncio ~= 1.2',
     'pytest-mock ~= 3.14',
     'ruff ~= 0.8',
-    'types-aiofiles ~= 24.1',
+    'types-aiofiles ~= 25.1',
     'types-html5lib ~= 1.1',
     'types-requests ~= 2.32',
     'virtualenv ~= 20.26',

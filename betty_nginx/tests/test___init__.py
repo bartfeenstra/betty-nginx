@@ -1,16 +1,31 @@
 from betty.app import App
 from betty.project import Project
+from betty.project.extension import Extension
 from betty.project.generate import generate
-from betty.test_utils.project.extension import ExtensionTestBase
+from betty.test_utils.project.extension import (
+    ExtensionTestBase,
+    ExtensionDefinitionTestBase,
+)
 from typing_extensions import override
 
 from betty_nginx import Nginx
+import pytest
+from betty.plugin import PluginDefinition
 
 
-class TestNginx(ExtensionTestBase[Nginx]):
+class TestNginxDefinition(ExtensionDefinitionTestBase):
     @override
-    def get_sut_class(self) -> type[Nginx]:
-        return Nginx
+    @pytest.fixture
+    def sut(self) -> PluginDefinition:
+        return Nginx.plugin
+
+
+class TestNginx(ExtensionTestBase):
+    @override
+    @pytest.fixture
+    async def sut(self, new_temporary_app: App) -> Extension:
+        async with Project.new_temporary(new_temporary_app) as project, project:
+            return await Nginx.new_for_project(project)
 
     async def test_generate(self, new_temporary_app: App):
         async with Project.new_temporary(new_temporary_app) as project:
