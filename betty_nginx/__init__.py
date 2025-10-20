@@ -5,10 +5,9 @@ from typing import final
 
 from betty.job import Job
 from betty.job.scheduler import Scheduler
-from betty.locale.localizable import _, Localizable, Plain
-from betty.machine_name import MachineName
+from betty.locale.localizable import _, Plain
 from betty.project import ProjectContext
-from betty.project.extension import ConfigurableExtension
+from betty.project.extension import ConfigurableExtension, ExtensionDefinition
 from betty.project.generate import Generator
 from typing_extensions import override
 
@@ -59,27 +58,18 @@ class GenerateDockerfile(Job[ProjectContext]):
 
 
 @final
+@ExtensionDefinition(
+    id="nginx",
+    label=Plain("Nginx"),
+    description=_(
+        "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
+    ),
+    assets_directory_path=Path(__file__).parent / "assets",
+)
 class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
     """
     Integrate Betty with nginx (and Docker).
     """
-
-    @override
-    @classmethod
-    def plugin_id(cls) -> MachineName:
-        return "nginx"
-
-    @override
-    @classmethod
-    def plugin_label(cls) -> Localizable:
-        return Plain("Nginx")
-
-    @override
-    @classmethod
-    def plugin_description(cls) -> Localizable:
-        return _(
-            "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
-        )
 
     @override
     async def generate(self, scheduler: Scheduler[ProjectContext]) -> None:
@@ -89,11 +79,6 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
     @classmethod
     def new_default_configuration(cls) -> NginxConfiguration:
         return NginxConfiguration()
-
-    @override
-    @classmethod
-    def assets_directory_path(cls) -> Path | None:
-        return Path(__file__).parent / "assets"
 
     @property
     def https(self) -> bool:

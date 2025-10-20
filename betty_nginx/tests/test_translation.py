@@ -23,7 +23,7 @@ class TestPotFile(PotFileTestBase):
         self, output_assets_directory_path_override: Path
     ) -> None:
         await update_extension_translations(
-            Nginx,
+            Nginx.plugin,
             Path(__file__).parent.parent,
             _output_assets_directory_path_override=output_assets_directory_path_override,
         )
