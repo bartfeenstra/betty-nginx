@@ -37,15 +37,12 @@ class TestNginx:
         async with (
             App.new_temporary() as app,
             app,
-            Project.new_temporary(app) as project,
+            Project.new_temporary(app, configuration=configuration) as project,
+            project,
         ):
-            project.configuration.load(configuration.dump())
-            async with project:
-                await generate.generate(project)
-                async with await DockerizedNginxServer.new_for_project(
-                    project
-                ) as server:
-                    yield server
+            await generate.generate(project)
+            async with await DockerizedNginxServer.new_for_project(project) as server:
+                yield server
 
     async def assert_betty_html(self, response: Response) -> None:
         assert response.headers["Content-Type"] == "text/html"

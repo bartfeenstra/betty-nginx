@@ -16,19 +16,13 @@ class Container:
     A Docker container with nginx, configured to serve a Betty site.
     """
 
-    _IMAGE_TAG = "betty-nginx-serve"
+    _IMAGE_TAG = "betty-nginx"
 
-    def __init__(
-        self,
-        www_directory_path: Path,
-        docker_directory_path: Path,
-        nginx_configuration_file_path: Path,
-    ):
-        self._docker_directory_path = docker_directory_path
-        self._nginx_configuration_file_path = nginx_configuration_file_path
-        self._www_directory_path = www_directory_path
+    def __init__(self, artifacts_directory_path: Path, output_directory_path: Path, /):
+        self._artifacts_directory_path = artifacts_directory_path
+        self._www_directory_path = output_directory_path / "www"
         self._client = docker.from_env()
-        self.__container: DockerContainer | None = None
+        self._docker_container: DockerContainer | None = None
 
     async def __aenter__(self) -> None:
         await self.start()
@@ -49,7 +43,7 @@ class Container:
 
     def _start(self) -> None:
         self._client.images.build(
-            path=str(self._docker_directory_path), tag=self._IMAGE_TAG
+            path=str(self._artifacts_directory_path / "docker"), tag=self._IMAGE_TAG
         )
         self._container.start()
         self._container.exec_run(["nginx", "-s", "reload"])
@@ -66,15 +60,22 @@ class Container:
 
     @property
     def _container(self) -> DockerContainer:
-        if self.__container is None:
-            self.__container = self._client.containers.create(
+        if self._docker_container is None:
+            nginx_configuration_path = self._artifacts_directory_path / "conf.d"
+            nginx_configuration_path.mkdir(exist_ok=True, parents=True)
+            self._www_directory_path.mkdir(exist_ok=True, parents=True)
+
+            self._docker_container = self._client.containers.create(
                 self._IMAGE_TAG,
                 auto_remove=True,
                 detach=True,
                 volumes={
-                    self._nginx_configuration_file_path: {
-                        "bind": "/etc/nginx/conf.d/betty.conf",
-                        "mode": "ro",
+                    **{
+                        nginx_configuration_file_path: {
+                            "bind": f"/etc/nginx/conf.d/{Path(nginx_configuration_file_path).name}",
+                            "mode": "ro",
+                        }
+                        for nginx_configuration_file_path in nginx_configuration_path.iterdir()
                     },
                     self._www_directory_path: {
                         "bind": "/var/www/betty",
@@ -82,7 +83,7 @@ class Container:
                     },
                 },
             )
-        return self.__container
+        return self._docker_container
 
     @property
     def ip(self) -> str:

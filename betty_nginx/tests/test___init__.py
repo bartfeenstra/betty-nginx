@@ -34,13 +34,8 @@ class TestNginx(ExtensionTestBase):
             async with project:
                 await generate(project)
                 assert (
-                    project.configuration.output_directory_path / "nginx" / "nginx.conf"
+                    project.configuration.output_directory_path / "nginx" / "conf.d"
                 ).exists()
                 assert (
-                    project.configuration.output_directory_path
-                    / "nginx"
-                    / "content_negotiation.lua"
-                ).exists()
-                assert (
-                    project.configuration.output_directory_path / "nginx" / "Dockerfile"
+                    project.configuration.output_directory_path / "nginx" / "docker"
                 ).exists()

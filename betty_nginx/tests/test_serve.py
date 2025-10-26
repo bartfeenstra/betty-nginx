@@ -27,7 +27,7 @@ class TestDockerizedNginxServer:
         def _assert_response(response: Response) -> None:
             assert response.status_code == 200
             assert content == response.content.decode("utf-8")
-            assert response.headers["Cache-Control"] == "no-cache"
+            assert response.headers["Cache-Control"] == "max-age=86400"
 
         content = "Hello, and welcome to my site!"
         async with (
