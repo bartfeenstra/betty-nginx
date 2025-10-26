@@ -3,7 +3,6 @@ Integrate the nginx extension with Betty's Serve API.
 """
 
 import logging
-from collections.abc import Mapping
 from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import final, Self
@@ -17,8 +16,7 @@ from betty.serve import NoPublicUrlBecauseServerNotStartedError, Server
 from docker.errors import DockerException
 from typing_extensions import override
 
-from betty_nginx import Nginx
-from betty_nginx.artifact import generate_dockerfile_file, generate_configuration_file
+from betty_nginx.artifact import generate_nginx_configuration, generate_dockerfile
 from betty_nginx.docker import Container
 
 
@@ -45,46 +43,24 @@ class DockerizedNginxServer(ProjectDependentFactory, Server):
 
         await makedirs(self._project.configuration.www_directory_path, exist_ok=True)
 
-        output_directory_path_str: str = await self._exit_stack.enter_async_context(
-            TemporaryDirectory()
+        isolated_artifacts_directory_path = Path(
+            await self._exit_stack.enter_async_context(TemporaryDirectory())
         )
 
-        isolated_project: Project = await self._exit_stack.enter_async_context(
-            Project.new_temporary(self._project.app, ancestry=self._project.ancestry)
-        )
-        isolated_project.configuration.configuration_file_path = (
-            self._project.configuration.configuration_file_path
-        )
-        isolated_project.configuration.load(self._project.configuration.dump())
-        isolated_project.configuration.debug = True
-
-        # Work around https://github.com/bartfeenstra/betty-nginx/issues/3.
-        nginx_configuration = isolated_project.configuration.extensions[
-            Nginx
-        ].configuration
-        assert isinstance(nginx_configuration, Mapping)
-        nginx_configuration["https"] = False
-
-        await self._exit_stack.enter_async_context(isolated_project)
-
-        nginx_configuration_file_path = Path(output_directory_path_str) / "nginx.conf"
-        docker_directory_path = Path(output_directory_path_str)
-        dockerfile_file_path = docker_directory_path / "Dockerfile"
-
-        await generate_configuration_file(
-            isolated_project,
-            destination_file_path=nginx_configuration_file_path,
+        await generate_nginx_configuration(
+            self._project,
+            artifacts_directory_path=isolated_artifacts_directory_path,
             https=False,
             www_directory_path="/var/www/betty",
         )
-        await generate_dockerfile_file(
-            isolated_project,
-            destination_file_path=dockerfile_file_path,
+        await generate_dockerfile(
+            self._project,
+            artifacts_directory_path=isolated_artifacts_directory_path,
         )
+
         self._container = Container(
-            isolated_project.configuration.www_directory_path,
-            docker_directory_path,
-            nginx_configuration_file_path,
+            isolated_artifacts_directory_path,
+            self._project.configuration.output_directory_path,
         )
         await self._exit_stack.enter_async_context(self._container)
 

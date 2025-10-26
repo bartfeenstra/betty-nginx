@@ -22,29 +22,35 @@ def _rootname(source_path: Path) -> Path:
         root = possible_root
 
 
-async def generate_configuration_file(
+async def generate_nginx_configuration(
     project: Project,
-    destination_file_path: Path | None = None,
+    *,
+    artifacts_directory_path: Path | None = None,
     www_directory_path: str | None = None,
     https: bool | None = None,
 ) -> None:
     """
-    Generate an ``nginx.conf`` file to the given destination path.
+    Generate ``nginx.conf`` and related files to the given artifact path.
     """
     from betty_nginx import Nginx
+
+    if artifacts_directory_path is None:
+        artifacts_directory_path = project.configuration.output_directory_path / "nginx"
+    artifacts_directory_path /= "conf.d"
+    await makedirs(artifacts_directory_path, exist_ok=True)
 
     extensions = await project.extensions
     nginx = extensions[Nginx]
     assert isinstance(nginx, Nginx)
+
+    if https is None:
+        https = nginx.https
+
     data = {
         "server_name": urlparse(project.configuration.base_url).netloc,
         "www_directory_path": www_directory_path or nginx.www_directory_path,
-        "https": https or nginx.https,
+        "https": https,
     }
-    if destination_file_path is None:
-        destination_file_path = (
-            project.configuration.output_directory_path / "nginx" / "nginx.conf"
-        )
     root_path = _rootname(Path(__file__))
     configuration_file_template_name = "/".join(
         (Path(__file__).parent / "assets" / "nginx.conf.j2")
@@ -55,28 +61,30 @@ async def generate_configuration_file(
     template = FileSystemLoader(root_path).load(
         jinja2_environment, configuration_file_template_name, jinja2_environment.globals
     )
-    await makedirs(destination_file_path.parent, exist_ok=True)
     configuration_file_contents = await template.render_async(data)
-    async with aiofiles.open(destination_file_path, "w", encoding="utf-8") as f:
+    async with aiofiles.open(
+        artifacts_directory_path / "nginx.conf", "w", encoding="utf-8"
+    ) as f:
         await f.write(configuration_file_contents)
 
 
-async def generate_dockerfile_file(
-    project: Project, destination_file_path: Path | None = None
+async def generate_dockerfile(
+    project: Project, *, artifacts_directory_path: Path | None = None
 ) -> None:
     """
-    Generate a ``Dockerfile`` to the given destination path.
+    Generate a ``Dockerfile`` to the given artifact path.
     """
-    if destination_file_path is None:
-        destination_file_path = (
-            project.configuration.output_directory_path / "nginx" / "Dockerfile"
-        )
-    await makedirs(destination_file_path.parent, exist_ok=True)
+    if artifacts_directory_path is None:
+        artifacts_directory_path = project.configuration.output_directory_path / "nginx"
+    artifacts_directory_path /= "docker"
+    await makedirs(artifacts_directory_path, exist_ok=True)
     await asyncio.to_thread(
-        copyfile, Path(__file__).parent / "assets" / "Dockerfile", destination_file_path
+        copyfile,
+        Path(__file__).parent / "assets" / "Dockerfile",
+        artifacts_directory_path / "Dockerfile",
     )
     await asyncio.to_thread(
         copyfile,
         Path(__file__).parent / "assets" / "content_negotiation.lua",
-        destination_file_path.parent / "content_negotiation.lua",
+        artifacts_directory_path / "content_negotiation.lua",
     )

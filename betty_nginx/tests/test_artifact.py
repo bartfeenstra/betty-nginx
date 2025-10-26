@@ -7,11 +7,11 @@ from betty.project.config import LocaleConfiguration
 from betty.plugin.config import PluginInstanceConfiguration
 
 from betty_nginx import Nginx
-from betty_nginx.artifact import generate_configuration_file, generate_dockerfile_file
+from betty_nginx.artifact import generate_nginx_configuration, generate_dockerfile
 from betty_nginx.config import NginxConfiguration
 
 
-class TestGenerateConfigurationFile:
+class TestGenerateNginxConfiguration:
     _LEADING_WHITESPACE_PATTERN = re.compile(r"^\s*(.*?)$")
 
     def _normalize_configuration(self, configuration: str) -> str:
@@ -29,9 +29,12 @@ class TestGenerateConfigurationFile:
         return match.group(1)
 
     async def _assert_configuration_equals(self, expected: str, project: Project):
-        await generate_configuration_file(project)
+        await generate_nginx_configuration(project)
         with open(
-            project.configuration.output_directory_path / "nginx" / "nginx.conf"
+            project.configuration.output_directory_path
+            / "nginx"
+            / "conf.d"
+            / "nginx.conf"
         ) as f:
             actual = f.read()
         assert self._normalize_configuration(expected) == self._normalize_configuration(
@@ -388,7 +391,7 @@ server {
                 await self._assert_configuration_equals(expected, project)
 
 
-class TestGenerateDockerfileFile:
+class TestGenerateDockerfile:
     async def test(self, temporary_app: App) -> None:
         async with Project.new_temporary(temporary_app) as project:
             project.configuration.extensions.append(
@@ -400,12 +403,16 @@ class TestGenerateDockerfileFile:
                 )
             )
             async with project:
-                await generate_dockerfile_file(project)
+                await generate_dockerfile(project)
                 assert (
                     project.configuration.output_directory_path
                     / "nginx"
+                    / "docker"
                     / "content_negotiation.lua"
                 ).exists()
                 assert (
-                    project.configuration.output_directory_path / "nginx" / "Dockerfile"
+                    project.configuration.output_directory_path
+                    / "nginx"
+                    / "docker"
+                    / "Dockerfile"
                 ).exists()

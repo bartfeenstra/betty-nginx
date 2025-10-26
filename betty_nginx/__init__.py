@@ -1,5 +1,6 @@
 """Integrate Betty with `nginx <https://nginx.org/>`_."""
 
+from asyncio import gather
 from pathlib import Path
 from typing import final
 
@@ -11,35 +12,14 @@ from betty.project.extension import ConfigurableExtension, ExtensionDefinition
 from betty.project.generate import Generator
 from typing_extensions import override
 
-from betty_nginx.artifact import generate_configuration_file, generate_dockerfile_file
+from betty_nginx.artifact import generate_nginx_configuration, generate_dockerfile
 from betty_nginx.config import NginxConfiguration
 
 
 @final
-class GenerateConfigurationFile(Job[ProjectContext]):
+class GenerateArtifacts(Job[ProjectContext]):
     """
-    Generate nginx.conf.
-    """
-
-    def __init__(self):
-        super().__init__(self.id_for(), priority=True)
-
-    @classmethod
-    def id_for(cls) -> str:
-        """
-        Get the job ID.
-        """
-        return "betty-nginx-generate-configuration-file"
-
-    @override
-    async def do(self, scheduler: Scheduler[ProjectContext], /) -> None:
-        await generate_configuration_file(scheduler.context.project)
-
-
-@final
-class GenerateDockerfile(Job[ProjectContext]):
-    """
-    Generate Dockerfile.
+    Generate the artifacts.
     """
 
     def __init__(self):
@@ -50,11 +30,14 @@ class GenerateDockerfile(Job[ProjectContext]):
         """
         Get the job ID.
         """
-        return "betty-nginx-generate-dockerfile"
+        return "betty-nginx-generate-artifacts"
 
     @override
     async def do(self, scheduler: Scheduler[ProjectContext], /) -> None:
-        await generate_dockerfile_file(scheduler.context.project)
+        await gather(
+            generate_nginx_configuration(scheduler.context.project),
+            generate_dockerfile(scheduler.context.project),
+        )
 
 
 @final
@@ -73,7 +56,7 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
 
     @override
     async def generate(self, scheduler: Scheduler[ProjectContext]) -> None:
-        await scheduler.add(GenerateConfigurationFile(), GenerateDockerfile())
+        await scheduler.add(GenerateArtifacts())
 
     @override
     @classmethod
