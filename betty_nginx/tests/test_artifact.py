@@ -38,8 +38,8 @@ class TestGenerateConfigurationFile:
             actual
         )
 
-    async def test(self, new_temporary_app: App):
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test(self, temporary_app: App):
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.extensions.enable(Nginx)
             expected = (
@@ -76,8 +76,8 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_multilingual(self, new_temporary_app: App) -> None:
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_multilingual(self, temporary_app: App) -> None:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.locales.replace(
                 LocaleConfiguration(
@@ -155,8 +155,8 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_multilingual_with_clean_urls(self, new_temporary_app: App) -> None:
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_multilingual_with_clean_urls(self, temporary_app: App) -> None:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.clean_urls = True
             project.configuration.locales.replace(
@@ -251,8 +251,8 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_with_clean_urls(self, new_temporary_app: App) -> None:
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_with_clean_urls(self, temporary_app: App) -> None:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.clean_urls = True
             project.configuration.extensions.enable(Nginx)
@@ -296,8 +296,8 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_with_https(self, new_temporary_app: App) -> None:
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_with_https(self, temporary_app: App) -> None:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "https://example.com"
             project.configuration.extensions.enable(Nginx)
             expected = (
@@ -340,8 +340,8 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_with_overridden_www_directory_path(self, new_temporary_app: App):
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_with_overridden_www_directory_path(self, temporary_app: App):
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.extensions.append(
                 PluginInstanceConfiguration(
                     Nginx,
@@ -389,8 +389,8 @@ server {
 
 
 class TestGenerateDockerfileFile:
-    async def test(self, new_temporary_app: App) -> None:
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test(self, temporary_app: App) -> None:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.extensions.append(
                 PluginInstanceConfiguration(
                     Nginx,
