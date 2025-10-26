@@ -16,7 +16,7 @@ authors = [
 requires-python = '~= 3.11'
 dependencies = [
     'aiofiles ~= 25.1',
-    'betty == 0.5.0a13',
+    'betty == 0.5.0a14',
     'docker ~= 7.1',
 ]
 classifiers = [
@@ -65,6 +65,7 @@ setuptools = [
     'wheel ~= 0.45.1',
 ]
 test = [
+    'aioresponses ~= 0.7.8',
     'basedmypy ~= 2.5',
     'coverage ~= 7.6',
     'html5lib ~= 1.1',
