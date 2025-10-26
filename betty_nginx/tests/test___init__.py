@@ -23,12 +23,12 @@ class TestNginxDefinition(ExtensionDefinitionTestBase):
 class TestNginx(ExtensionTestBase):
     @override
     @pytest.fixture
-    async def sut(self, new_temporary_app: App) -> Extension:
-        async with Project.new_temporary(new_temporary_app) as project, project:
+    async def sut(self, temporary_app: App) -> Extension:
+        async with Project.new_temporary(temporary_app) as project, project:
             return await Nginx.new_for_project(project)
 
-    async def test_generate(self, new_temporary_app: App):
-        async with Project.new_temporary(new_temporary_app) as project:
+    async def test_generate(self, temporary_app: App):
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.extensions.enable(Nginx)
             async with project:

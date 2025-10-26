@@ -11,10 +11,10 @@ from betty_nginx import Nginx
 
 
 class TestServe:
-    async def test(self, mocker: MockerFixture, new_temporary_app: App) -> None:
+    async def test(self, mocker: MockerFixture, temporary_app: App) -> None:
         mocker.patch("asyncio.sleep", side_effect=KeyboardInterrupt)
         mocker.patch("betty_nginx.serve.DockerizedNginxServer", new=NoOpProjectServer)
-        async with Project.new_temporary(new_temporary_app) as project:
+        async with Project.new_temporary(temporary_app) as project:
             project.configuration.extensions.enable(Nginx)
 
             await write_configuration_file(
@@ -23,7 +23,7 @@ class TestServe:
             await makedirs(project.configuration.www_directory_path)
             async with project:
                 await run(
-                    new_temporary_app,
+                    temporary_app,
                     "nginx-serve",
                     "-p",
                     str(project.configuration.configuration_file_path),
