@@ -6,6 +6,7 @@ from pathlib import Path
 import html5lib
 import pytest
 import requests
+from betty.ancestry import Ancestry
 from betty.ancestry.place import Place
 from betty.app import App
 from betty.functools import Do
@@ -32,12 +33,14 @@ from betty_nginx.serve import DockerizedNginxServer
 class TestNginx:
     @asynccontextmanager
     async def server(
-        self, configuration: ProjectConfiguration
+        self, configuration: ProjectConfiguration, *, ancestry: Ancestry | None = None
     ) -> AsyncIterator[Server]:
         async with (
             App.new_temporary() as app,
             app,
-            Project.new_temporary(app, configuration=configuration) as project,
+            Project.new_temporary(
+                app, ancestry=ancestry, configuration=configuration
+            ) as project,
             project,
         ):
             await generate.generate(project)
@@ -145,10 +148,10 @@ class TestNginx:
         )
 
     def _build_assert_status_code(
-        self, http_status_code: int
+        self, expected_http_status_code: int
     ) -> Callable[[Response], None]:
         def _assert(response: Response) -> None:
-            assert http_status_code == response.status_code
+            assert response.status_code == expected_http_status_code
 
         return _assert
 
@@ -328,4 +331,40 @@ class TestNginx:
             ).until(
                 self._build_assert_status_code(404),
                 self.assert_betty_json,
+            )
+
+    async def test_legacy_entity_redirects__monolingual(
+        self, monolingual_configuration: ProjectConfiguration
+    ):
+        monolingual_configuration.extensions[Nginx].configuration[  # type: ignore[call-overload,index]
+            "legacy_entity_redirects"
+        ] = True
+        ancestry = Ancestry()
+        entity = Place(id="my-first-place")
+        ancestry.add(entity)
+        async with self.server(monolingual_configuration, ancestry=ancestry) as server:
+            await Do(
+                requests.get,
+                f"{server.public_url}/{entity.plugin.id}/{entity.id}/index.html",
+            ).until(
+                self._build_assert_status_code(200),
+                self.assert_betty_html,
+            )
+
+    async def test_legacy_entity_redirects__multilingual(
+        self, multilingual_configuration: ProjectConfiguration
+    ):
+        multilingual_configuration.extensions[Nginx].configuration[  # type: ignore[call-overload,index]
+            "legacy_entity_redirects"
+        ] = True
+        ancestry = Ancestry()
+        entity = Place(id="my-first-place")
+        ancestry.add(entity)
+        async with self.server(multilingual_configuration, ancestry=ancestry) as server:
+            await Do(
+                requests.get,
+                f"{server.public_url}/en/{entity.plugin.id}/{entity.id}/index.html",
+            ).until(
+                self._build_assert_status_code(200),
+                self.assert_betty_html,
             )

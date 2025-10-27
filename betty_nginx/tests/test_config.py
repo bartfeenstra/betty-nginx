@@ -37,6 +37,14 @@ class TestNginxConfiguration:
         sut.load(dump)
         assert sut.https == https
 
+    async def test_load__with_legacy_entity_redirects(self) -> None:
+        dump: Dump = {
+            "legacy_entity_redirects": True,
+        }
+        sut = NginxConfiguration()
+        sut.load(dump)
+        assert sut.legacy_entity_redirects
+
     async def test_load__with_www_directory(self) -> None:
         www_directory = "/var/www"
         dump: Dump = {
@@ -50,6 +58,15 @@ class TestNginxConfiguration:
         sut = NginxConfiguration()
         expected = {
             "https": None,
+        }
+        assert sut.dump() == expected
+
+    async def test_dump__with_legacy_entity_redirects(self) -> None:
+        sut = NginxConfiguration()
+        sut.legacy_entity_redirects = True
+        expected = {
+            "https": None,
+            "legacy_entity_redirects": True,
         }
         assert sut.dump() == expected
 

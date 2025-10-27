@@ -10,6 +10,20 @@ add_header Vary Accept-Language;
 {% endif %}
 {% endmacro %}
 
+{% if project.extensions["nginx"].configuration.legacy_entity_redirects %}
+    map $uri $legacy_entity_redirect {
+        default "none";
+        {% set url_path_prefix -%}
+            {% if project.configuration.locales.multilingual -%}
+                /{{ project.configuration.locales.values() | map(attribute="alias")| join("|") }}
+            {%- endif %}
+        {%- endset %}
+        {% for entity in project.ancestry if entity.plugin.public_facing %}
+            ~^({{ url_path_prefix }})?/{{ entity.plugin.id }}/{{ entity.id }}(\/.*)*$ $1/{{ entity.plugin.id }}/{{ entity.public_id }}$2;
+        {% endfor %}
+    }
+{% endif %}
+
 {% if https %}
     server {
         listen 80;
@@ -47,6 +61,13 @@ server {
         set $media_type_extension html;
     {% endif %}
     index index.$media_type_extension;
+
+    {% if project.extensions["nginx"].configuration.legacy_entity_redirects %}
+        if ($legacy_entity_redirect != "none") {
+            rewrite ^ $legacy_entity_redirect permanent;
+        }
+    {% endif %}
+
 
     {% if project.configuration.locales.multilingual %}
         location @localized_redirect {
