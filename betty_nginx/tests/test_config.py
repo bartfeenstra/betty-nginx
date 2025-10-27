@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
 import pytest
@@ -13,11 +12,11 @@ if TYPE_CHECKING:
 
 
 class TestNginxConfiguration:
-    async def test_load_with_minimal_configuration(self) -> None:
+    async def test_load__minimal(self) -> None:
         dump: Mapping[str, Any] = {}
         NginxConfiguration().load(dump)
 
-    async def test_load_without_dict_should_error(self) -> None:
+    async def test_load__without_dict_should_error(self) -> None:
         dump = None
         with raises_error(error_type=UserFacingException):
             NginxConfiguration().load(dump)
@@ -30,7 +29,7 @@ class TestNginxConfiguration:
             False,
         ],
     )
-    async def test_load_with_https(self, https: bool | None) -> None:
+    async def test_load__with_https(self, https: bool | None) -> None:
         dump: Dump = {
             "https": https,
         }
@@ -38,14 +37,8 @@ class TestNginxConfiguration:
         sut.load(dump)
         assert sut.https == https
 
-    @pytest.mark.parametrize(
-        "www_directory",
-        [
-            None,
-            "/var/www",
-        ],
-    )
-    async def test_load_with_www_directory(self, www_directory: str | None) -> None:
+    async def test_load__with_www_directory(self) -> None:
+        www_directory = "/var/www"
         dump: Dump = {
             "www_directory": www_directory,
         }
@@ -53,16 +46,15 @@ class TestNginxConfiguration:
         sut.load(dump)
         assert sut.www_directory_path == www_directory
 
-    async def test_dump_with_minimal_configuration(self) -> None:
+    async def test_dump__minimal(self) -> None:
         sut = NginxConfiguration()
         expected = {
             "https": None,
-            "www_directory": None,
         }
         assert sut.dump() == expected
 
-    async def test_dump_with_www_directory_path(self, tmp_path: Path) -> None:
-        www_directory_path = str(tmp_path)
+    async def test_dump__with_www_directory(self) -> None:
+        www_directory_path = "/var/www"
         sut = NginxConfiguration()
         sut.www_directory_path = www_directory_path
         expected = {
