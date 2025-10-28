@@ -1,21 +1,24 @@
 # Translations template for Betty.
-# Copyright (C) 2024 Bart Feenstra & contributors
+# Copyright (C) 2025 Bart Feenstra & contributors
 # This file is distributed under the same license as the Betty project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Betty VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-12-20 14:22+0000\n"
+"POT-Creation-Date: 2025-10-29 12:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Generate nginx configuration"
+msgstr ""
 
 msgid ""
 "Generate nginx configuration for your site, as well as a Dockerfile to "
@@ -23,5 +26,18 @@ msgid ""
 msgstr ""
 
 msgid "Serve a generated site with nginx in a Docker container."
+msgstr ""
+
+msgid ""
+"The nginx configuration has not been generated yet. Generate your site, "
+"and try again."
+msgstr ""
+
+msgid ""
+"Whether to generate configuration for a local environment. This disables "
+"HTTPS, for example."
+msgstr ""
+
+msgid "Whether to generate configuration for a public hosting environment."
 msgstr ""
 

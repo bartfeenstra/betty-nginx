@@ -3,12 +3,25 @@ Integrate Betty with Docker.
 """
 
 import asyncio
+from enum import IntEnum
 from pathlib import Path
 from types import TracebackType
-from typing import cast
+from typing import cast, final
 
 import docker
+from betty.exception import UserFacingException
+from betty.locale.localizable import _
 from docker.models.containers import Container as DockerContainer
+
+
+@final
+class Environment(IntEnum):
+    """
+    The kind of environment to create a container for.
+    """
+
+    LOCAL = 0
+    PUBLIC = 1
 
 
 class Container:
@@ -18,9 +31,15 @@ class Container:
 
     _IMAGE_TAG = "betty-nginx"
 
-    def __init__(self, artifacts_directory_path: Path, output_directory_path: Path, /):
-        self._artifacts_directory_path = artifacts_directory_path
+    def __init__(
+        self,
+        output_directory_path: Path,
+        /,
+        environment: Environment = Environment.LOCAL,
+    ):
+        self._artifacts_directory_path = output_directory_path / "nginx"
         self._www_directory_path = output_directory_path / "www"
+        self._environment = environment
         self._client = docker.from_env()
         self._docker_container: DockerContainer | None = None
 
@@ -42,8 +61,10 @@ class Container:
         await asyncio.to_thread(self._start)
 
     def _start(self) -> None:
+        self._assert_artifacts_directory()
         self._client.images.build(
-            path=str(self._artifacts_directory_path / "docker"), tag=self._IMAGE_TAG
+            path=str(self._artifacts_directory_path / "docker"),
+            tag=self._IMAGE_TAG,
         )
         self._container.start()
         self._container.exec_run(["nginx", "-s", "reload"])
@@ -58,24 +79,33 @@ class Container:
         if self._container is not None:
             self._container.stop()
 
+    def _assert_artifacts_directory(self) -> None:
+        if not self._artifacts_directory_path.is_dir():
+            raise UserFacingException(
+                _(
+                    "The nginx configuration has not been generated yet. Generate your site, and try again."
+                )
+            )
+
     @property
     def _container(self) -> DockerContainer:
         if self._docker_container is None:
+            self._assert_artifacts_directory()
             nginx_configuration_path = self._artifacts_directory_path / "conf.d"
-            nginx_configuration_path.mkdir(exist_ok=True, parents=True)
-            self._www_directory_path.mkdir(exist_ok=True, parents=True)
+            nginx_configuration_file_path = nginx_configuration_path / (
+                ".nginx-local.conf"
+                if self._environment is Environment.LOCAL
+                else "nginx.conf"
+            )
 
             self._docker_container = self._client.containers.create(
                 self._IMAGE_TAG,
                 auto_remove=True,
                 detach=True,
                 volumes={
-                    **{
-                        nginx_configuration_file_path: {
-                            "bind": f"/etc/nginx/conf.d/{Path(nginx_configuration_file_path).name}",
-                            "mode": "ro",
-                        }
-                        for nginx_configuration_file_path in nginx_configuration_path.iterdir()
+                    nginx_configuration_file_path: {
+                        "bind": "/etc/nginx/conf.d/nginx.conf",
+                        "mode": "ro",
                     },
                     self._www_directory_path: {
                         "bind": "/var/www/betty",

@@ -3,7 +3,6 @@ from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import html5lib
 import pytest
 import requests
 from betty.ancestry import Ancestry
@@ -11,7 +10,7 @@ from betty.ancestry.place import Place
 from betty.app import App
 from betty.functools import Do
 from betty.plugin.config import PluginInstanceConfiguration
-from betty.project import Project, ProjectSchema
+from betty.project import Project
 from betty.project import generate
 from betty.project.config import (
     LocaleConfiguration,
@@ -24,6 +23,7 @@ from requests import Response
 from betty_nginx import Nginx
 from betty_nginx.config import NginxConfiguration
 from betty_nginx.serve import DockerizedNginxServer
+from betty_nginx.tests.conftest import AssertBettyJson, AssertBettyHtml
 
 
 @pytest.mark.skipif(
@@ -44,26 +44,8 @@ class TestNginx:
             project,
         ):
             await generate.generate(project)
-            async with await DockerizedNginxServer.new_for_project(project) as server:
+            async with DockerizedNginxServer(project) as server:
                 yield server
-
-    async def assert_betty_html(self, response: Response) -> None:
-        assert response.headers["Content-Type"] == "text/html"
-        parser = html5lib.HTMLParser()
-        parser.parse(response.text)
-        assert "Betty" in response.text
-
-    async def assert_betty_json(self, response: Response) -> None:
-        assert response.headers["Content-Type"] == "application/json"
-        data = response.json()
-        async with (
-            App.new_temporary() as app,
-            app,
-            Project.new_temporary(app) as project,
-            project,
-        ):
-            schema = await ProjectSchema.new_for_project(project)
-            schema.validate(data)
 
     @pytest.fixture
     async def monolingual_configuration(self, tmp_path: Path) -> ProjectConfiguration:
@@ -156,25 +138,29 @@ class TestNginx:
         return _assert
 
     async def test_front_page(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(requests.get, server.public_url).until(
-                self._build_assert_status_code(200),
-                self.assert_betty_html,
+                self._build_assert_status_code(200), assert_betty_html
             )
 
     async def test_default_html_404(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(requests.get, f"{server.public_url}/non-existent-path/").until(
-                self._build_assert_status_code(404),
-                self.assert_betty_html,
+                self._build_assert_status_code(404), assert_betty_html
             )
 
     async def test_negotiated_json_404(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_json: AssertBettyJson,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(
@@ -183,30 +169,31 @@ class TestNginx:
                 headers={
                     "Accept": "application/json",
                 },
-            ).until(
-                self._build_assert_status_code(404),
-                self.assert_betty_json,
-            )
+            ).until(self._build_assert_status_code(404), assert_betty_json)
 
     async def test_default_localized_front_page(
-        self, multilingual_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        multilingual_configuration: ProjectConfiguration,
     ):
         async def _assert_response(response: Response) -> None:
             assert response.status_code == 200
             assert response.headers["Content-Language"] == "en"
             assert f"{server.public_url}/en/" == response.url
-            await self.assert_betty_html(response)
+            await assert_betty_html(response)
 
         async with self.server(multilingual_configuration) as server:
             await Do(requests.get, server.public_url).until(_assert_response)
 
     async def test_explicitly_localized_404(
-        self, multilingual_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        multilingual_configuration: ProjectConfiguration,
     ):
         async def _assert_response(response: Response) -> None:
             assert response.status_code == 404
             assert response.headers["Content-Language"] == "nl"
-            await self.assert_betty_html(response)
+            await assert_betty_html(response)
 
         async with self.server(multilingual_configuration) as server:
             await Do(requests.get, f"{server.public_url}/nl/non-existent-path/").until(
@@ -214,13 +201,15 @@ class TestNginx:
             )
 
     async def test_negotiated_localized_front_page(
-        self, multilingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        multilingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async def _assert_response(response: Response) -> None:
             assert response.status_code == 200
             assert response.headers["Content-Language"] == "nl"
             assert f"{server.public_url}/nl/" == response.url
-            await self.assert_betty_html(response)
+            await assert_betty_html(response)
 
         async with self.server(multilingual_clean_urls_configuration) as server:
             await Do(
@@ -232,7 +221,9 @@ class TestNginx:
             ).until(_assert_response)
 
     async def test_negotiated_localized_negotiated_json_404(
-        self, multilingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_json: AssertBettyJson,
+        multilingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(multilingual_clean_urls_configuration) as server:
             await Do(
@@ -242,25 +233,25 @@ class TestNginx:
                     "Accept": "application/json",
                     "Accept-Language": "nl-NL",
                 },
-            ).until(
-                self._build_assert_status_code(404),
-                self.assert_betty_json,
-            )
+            ).until(self._build_assert_status_code(404), assert_betty_json)
 
     async def test_default_html_resource(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         monolingual_clean_urls_configuration.entity_types.append(
             EntityTypeConfiguration(Place, generate_html_list=True)
         )
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(requests.get, f"{server.public_url}/place/").until(
-                self._build_assert_status_code(200),
-                self.assert_betty_html,
+                self._build_assert_status_code(200), assert_betty_html
             )
 
     async def test_negotiated_html_resource(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         monolingual_clean_urls_configuration.entity_types.append(
             EntityTypeConfiguration(Place, generate_html_list=True)
@@ -272,13 +263,12 @@ class TestNginx:
                 headers={
                     "Accept": "text/html",
                 },
-            ).until(
-                self._build_assert_status_code(200),
-                self.assert_betty_html,
-            )
+            ).until(self._build_assert_status_code(200), assert_betty_html)
 
     async def test_negotiated_json_resource(
-        self, monolingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_json: AssertBettyJson,
+        monolingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(monolingual_clean_urls_configuration) as server:
             await Do(
@@ -287,22 +277,21 @@ class TestNginx:
                 headers={
                     "Accept": "application/json",
                 },
-            ).until(
-                self._build_assert_status_code(200),
-                self.assert_betty_json,
-            )
+            ).until(self._build_assert_status_code(200), assert_betty_json)
 
     async def test_default_html_static_resource(
-        self, multilingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        multilingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(multilingual_clean_urls_configuration) as server:
             await Do(requests.get, f"{server.public_url}/non-existent-path/").until(
-                self._build_assert_status_code(404),
-                self.assert_betty_html,
+                self._build_assert_status_code(404), assert_betty_html
             )
 
     async def test_negotiated_html_static_resource(
         self,
+        assert_betty_html: AssertBettyHtml,
         multilingual_clean_urls_configuration: ProjectConfiguration,
         tmp_path: Path,
     ):
@@ -313,13 +302,12 @@ class TestNginx:
                 headers={
                     "Accept": "text/html",
                 },
-            ).until(
-                self._build_assert_status_code(404),
-                self.assert_betty_html,
-            )
+            ).until(self._build_assert_status_code(404), assert_betty_html)
 
     async def test_negotiated_json_static_resource(
-        self, multilingual_clean_urls_configuration: ProjectConfiguration
+        self,
+        assert_betty_json: AssertBettyJson,
+        multilingual_clean_urls_configuration: ProjectConfiguration,
     ):
         async with self.server(multilingual_clean_urls_configuration) as server:
             await Do(
@@ -328,13 +316,12 @@ class TestNginx:
                 headers={
                     "Accept": "application/json",
                 },
-            ).until(
-                self._build_assert_status_code(404),
-                self.assert_betty_json,
-            )
+            ).until(self._build_assert_status_code(404), assert_betty_json)
 
     async def test_legacy_entity_redirects__monolingual(
-        self, monolingual_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        monolingual_configuration: ProjectConfiguration,
     ):
         monolingual_configuration.extensions[Nginx].configuration[  # type: ignore[call-overload,index]
             "legacy_entity_redirects"
@@ -346,13 +333,12 @@ class TestNginx:
             await Do(
                 requests.get,
                 f"{server.public_url}/{entity.plugin.id}/{entity.id}/index.html",
-            ).until(
-                self._build_assert_status_code(200),
-                self.assert_betty_html,
-            )
+            ).until(self._build_assert_status_code(200), assert_betty_html)
 
     async def test_legacy_entity_redirects__multilingual(
-        self, multilingual_configuration: ProjectConfiguration
+        self,
+        assert_betty_html: AssertBettyHtml,
+        multilingual_configuration: ProjectConfiguration,
     ):
         multilingual_configuration.extensions[Nginx].configuration[  # type: ignore[call-overload,index]
             "legacy_entity_redirects"
@@ -364,7 +350,4 @@ class TestNginx:
             await Do(
                 requests.get,
                 f"{server.public_url}/en/{entity.plugin.id}/{entity.id}/index.html",
-            ).until(
-                self._build_assert_status_code(200),
-                self.assert_betty_html,
-            )
+            ).until(self._build_assert_status_code(200), assert_betty_html)
