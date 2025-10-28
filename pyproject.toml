@@ -53,6 +53,7 @@ Twitter = 'https://twitter.com/BettyProject'
 X = 'https://twitter.com/BettyProject'
 
 [project.entry-points.'betty.command']
+'nginx-generate' = 'betty_nginx._console:NginxGenerate.plugin'
 'nginx-serve' = 'betty_nginx._console:NginxServe.plugin'
 
 [project.entry-points.'betty.extension']

@@ -1,19 +1,33 @@
 """Integrate Betty with `nginx <https://nginx.org/>`_."""
 
+import asyncio
 from asyncio import gather
 from pathlib import Path
+from shutil import copyfile
 from typing import final
+from urllib.parse import urlparse
 
+import aiofiles
+from aiofiles.os import makedirs
 from betty.job import Job
 from betty.job.scheduler import Scheduler
 from betty.locale.localizable import _, Plain
 from betty.project import ProjectContext
 from betty.project.extension import ConfigurableExtension, ExtensionDefinition
 from betty.project.generate import Generator
+from jinja2 import FileSystemLoader
 from typing_extensions import override
 
-from betty_nginx.artifact import generate_nginx_configuration, generate_dockerfile
 from betty_nginx.config import NginxConfiguration
+
+
+def _rootname(source_path: Path) -> Path:
+    root = source_path
+    while True:
+        possible_root = root.parent
+        if possible_root == root:
+            return root
+        root = possible_root
 
 
 @final
@@ -34,10 +48,8 @@ class GenerateArtifacts(Job[ProjectContext]):
 
     @override
     async def do(self, scheduler: Scheduler[ProjectContext], /) -> None:
-        await gather(
-            generate_nginx_configuration(scheduler.context.project),
-            generate_dockerfile(scheduler.context.project),
-        )
+        extensions = await scheduler.context.project.extensions
+        await extensions[Nginx].generate_artifacts()
 
 
 @final
@@ -79,4 +91,61 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
         """
         return self._configuration.www_directory_path or str(
             self._project.configuration.www_directory_path
+        )
+
+    async def generate_artifacts(self) -> None:
+        """
+        Generate all artifacts.
+        """
+        await gather(
+            self._generate_nginx_configuration("nginx.conf", self.https),
+            self._generate_nginx_configuration(".nginx-local.conf", False),
+            self._generate_dockerfile(),
+        )
+
+    async def _generate_nginx_configuration(
+        self, file_name: str, https: bool | None
+    ) -> None:
+        artifacts_directory_path = (
+            self.project.configuration.output_directory_path / "nginx" / "conf.d"
+        )
+        await makedirs(artifacts_directory_path, exist_ok=True)
+
+        data = {
+            "server_name": urlparse(self.project.configuration.base_url).netloc,
+            "www_directory_path": self.www_directory_path,
+            "https": https,
+        }
+        root_path = _rootname(Path(__file__))
+        configuration_file_template_name = "/".join(
+            (Path(__file__).parent / "assets" / "nginx.conf.j2")
+            .relative_to(root_path)
+            .parts
+        )
+        jinja2_environment = await self.project.jinja2_environment
+        template = FileSystemLoader(root_path).load(
+            jinja2_environment,
+            configuration_file_template_name,
+            jinja2_environment.globals,
+        )
+        configuration_file_contents = await template.render_async(data)
+        async with aiofiles.open(
+            artifacts_directory_path / file_name, "w", encoding="utf-8"
+        ) as f:
+            await f.write(configuration_file_contents)
+
+    async def _generate_dockerfile(self) -> None:
+        artifacts_directory_path = (
+            self.project.configuration.output_directory_path / "nginx" / "docker"
+        )
+        await makedirs(artifacts_directory_path, exist_ok=True)
+        await asyncio.to_thread(
+            copyfile,
+            Path(__file__).parent / "assets" / "Dockerfile",
+            artifacts_directory_path / "Dockerfile",
+        )
+        await asyncio.to_thread(
+            copyfile,
+            Path(__file__).parent / "assets" / "content_negotiation.lua",
+            artifacts_directory_path / "content_negotiation.lua",
         )
