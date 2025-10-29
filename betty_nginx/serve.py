@@ -7,6 +7,7 @@ from typing import final
 
 import docker
 from aiofiles.os import makedirs
+from betty.locale.localizable import _
 from betty.project import Project
 from betty.serve import NoPublicUrlBecauseServerNotStartedError, Server
 from docker.errors import DockerException
@@ -31,7 +32,7 @@ class DockerizedNginxServer(Server):
 
     @override
     async def start(self) -> None:
-        logging.getLogger(__name__).info("Starting a Dockerized nginx web server...")
+        await self._user.message_debug(_("Starting a Dockerized nginx web server..."))
 
         await makedirs(self._project.configuration.www_directory_path, exist_ok=True)
 
