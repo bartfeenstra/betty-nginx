@@ -63,7 +63,7 @@ class Container:
     def _start(self) -> None:
         self._assert_artifacts_directory()
         self._client.images.build(
-            path=str(self._artifacts_directory_path / "docker"),
+            path=str(self._artifacts_directory_path),
             tag=self._IMAGE_TAG,
         )
         self._container.start()
@@ -91,8 +91,7 @@ class Container:
     def _container(self) -> DockerContainer:
         if self._docker_container is None:
             self._assert_artifacts_directory()
-            nginx_configuration_path = self._artifacts_directory_path / "conf.d"
-            nginx_configuration_file_path = nginx_configuration_path / (
+            nginx_configuration_file_path = self._artifacts_directory_path / (
                 ".nginx-local.conf"
                 if self._environment is Environment.LOCAL
                 else "nginx.conf"
