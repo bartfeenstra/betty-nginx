@@ -93,6 +93,13 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
             self._project.configuration.www_directory_path
         )
 
+    @property
+    def artifacts_directory_path(self) -> Path:
+        """
+        The directory into which to generate the artifacts.
+        """
+        return self.project.configuration.output_directory_path / "nginx"
+
     async def generate_artifacts(self) -> None:
         """
         Generate all artifacts.
@@ -100,17 +107,13 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
         await gather(
             self._generate_nginx_configuration("nginx.conf", self.https),
             self._generate_nginx_configuration(".nginx-local.conf", False),
+            self._generate_content_negotiation(),
             self._generate_dockerfile(),
         )
 
     async def _generate_nginx_configuration(
         self, file_name: str, https: bool | None
     ) -> None:
-        artifacts_directory_path = (
-            self.project.configuration.output_directory_path / "nginx" / "conf.d"
-        )
-        await makedirs(artifacts_directory_path, exist_ok=True)
-
         data = {
             "server_name": urlparse(self.project.configuration.base_url).netloc,
             "www_directory_path": self.www_directory_path,
@@ -129,23 +132,24 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
             jinja2_environment.globals,
         )
         configuration_file_contents = await template.render_async(data)
+        await makedirs(self.artifacts_directory_path, exist_ok=True)
         async with aiofiles.open(
-            artifacts_directory_path / file_name, "w", encoding="utf-8"
+            self.artifacts_directory_path / file_name, "w", encoding="utf-8"
         ) as f:
             await f.write(configuration_file_contents)
 
     async def _generate_dockerfile(self) -> None:
-        artifacts_directory_path = (
-            self.project.configuration.output_directory_path / "nginx" / "docker"
-        )
-        await makedirs(artifacts_directory_path, exist_ok=True)
+        await makedirs(self.artifacts_directory_path, exist_ok=True)
         await asyncio.to_thread(
             copyfile,
             Path(__file__).parent / "assets" / "Dockerfile",
-            artifacts_directory_path / "Dockerfile",
+            self.artifacts_directory_path / "Dockerfile",
         )
+
+    async def _generate_content_negotiation(self) -> None:
+        await makedirs(self.artifacts_directory_path, exist_ok=True)
         await asyncio.to_thread(
             copyfile,
             Path(__file__).parent / "assets" / "content_negotiation.lua",
-            artifacts_directory_path / "content_negotiation.lua",
+            self.artifacts_directory_path / "content_negotiation.lua",
         )

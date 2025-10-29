@@ -38,12 +38,7 @@ class TestNginx(ExtensionTestBase):
             project.configuration.extensions.enable(Nginx)
             async with project:
                 await generate(project)
-                assert (
-                    project.configuration.output_directory_path / "nginx" / "conf.d"
-                ).exists()
-                assert (
-                    project.configuration.output_directory_path / "nginx" / "docker"
-                ).exists()
+                assert (project.configuration.output_directory_path / "nginx").exists()
 
     _LEADING_WHITESPACE_PATTERN = re.compile(r"^\s*(.*?)$")
 
@@ -65,17 +60,14 @@ class TestNginx(ExtensionTestBase):
         extensions = await project.extensions
         await extensions[Nginx].generate_artifacts()
         with open(
-            project.configuration.output_directory_path
-            / "nginx"
-            / "conf.d"
-            / "nginx.conf"
+            project.configuration.output_directory_path / "nginx" / "nginx.conf"
         ) as f:
             actual = f.read()
         assert self._normalize_configuration(expected) == self._normalize_configuration(
             actual
         )
 
-    async def test_generate_nginx_configuration(self, temporary_app: App):
+    async def test_generate_artifacts__nginx_configuration(self, temporary_app: App):
         async with Project.new_temporary(temporary_app) as project:
             project.configuration.url = "http://example.com"
             project.configuration.extensions.enable(Nginx)
@@ -113,7 +105,7 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_nginx_configuration__multilingual(
+    async def test_generate_artifacts__nginx_configuration_multilingual(
         self, temporary_app: App
     ) -> None:
         async with Project.new_temporary(temporary_app) as project:
@@ -194,7 +186,7 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_nginx_configuration__multilingual_with_clean_urls(
+    async def test_generate_artifacts__nginx_configuration_multilingual_with_clean_urls(
         self, temporary_app: App
     ) -> None:
         async with Project.new_temporary(temporary_app) as project:
@@ -292,7 +284,7 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_nginx_configuration__with_clean_urls(
+    async def test_generate_artifacts__nginx_configuration_with_clean_urls(
         self, temporary_app: App
     ) -> None:
         async with Project.new_temporary(temporary_app) as project:
@@ -339,7 +331,7 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_nginx_configuration__with_https(
+    async def test_generate_artifacts__nginx_configuration_with_https(
         self, temporary_app: App
     ) -> None:
         async with Project.new_temporary(temporary_app) as project:
@@ -385,7 +377,7 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_nginx_configuration__with_overridden_www_directory_path(
+    async def test_generate_artifacts__nginx_configuration_with_overridden_www_directory_path(
         self, temporary_app: App
     ):
         async with Project.new_temporary(temporary_app) as project:
@@ -434,28 +426,26 @@ server {
             async with project:
                 await self._assert_configuration_equals(expected, project)
 
-    async def test_generate_dockerfile(self, temporary_app: App) -> None:
+    async def test_generate_artifacts__dockerfile(self, temporary_app: App) -> None:
         async with Project.new_temporary(temporary_app) as project:
-            project.configuration.extensions.append(
-                PluginInstanceConfiguration(
-                    Nginx,
-                    configuration=NginxConfiguration(
-                        www_directory_path="/tmp/overridden-www",
-                    ),
-                )
-            )
+            project.configuration.extensions.enable(Nginx)
             async with project:
                 extensions = await project.extensions
-                await extensions[Nginx]._generate_dockerfile()
+                await extensions[Nginx].generate_artifacts()
                 assert (
                     project.configuration.output_directory_path
                     / "nginx"
-                    / "docker"
                     / "content_negotiation.lua"
                 ).exists()
+
+    async def test_generate_artifacts__content_negotiation(
+        self, temporary_app: App
+    ) -> None:
+        async with Project.new_temporary(temporary_app) as project:
+            project.configuration.extensions.enable(Nginx)
+            async with project:
+                extensions = await project.extensions
+                await extensions[Nginx].generate_artifacts()
                 assert (
-                    project.configuration.output_directory_path
-                    / "nginx"
-                    / "docker"
-                    / "Dockerfile"
+                    project.configuration.output_directory_path / "nginx" / "Dockerfile"
                 ).exists()
