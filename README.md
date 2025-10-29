@@ -49,13 +49,15 @@ container.
 
 # Artifacts
 The Nginx extension generates the following artifacts relative to your project's output directory:
-- `./nginx/content_negotiation.lua`
-  The Lua code the nginx configuration uses for
-  [content negotiation](https://en.wikipedia.org/wiki/Content_negotiation). It must be placed in your nginx's
-  `lua_package_path`.
-- `./nginx/nginx.conf`
-  Your site's public nginx configuration file. You may deploy this anywhere. You MUST configure `lua_package_path`. If
-  you are using HTTPS, you MUST configure SSL certificates.
-- `./nginx/Dockerfle`
-  A Docker image build manifest. You may use this to run your own containers. Nginx configuration MUST be placed in
-  `/etc/nginx/conf.d`, and the WWW directory MUST exist at `/var/www/betty`.
+
+## `./nginx/content_negotiation.lua`
+The Lua code the nginx configuration uses for [content negotiation](https://en.wikipedia.org/wiki/Content_negotiation). It must be placed in your nginx's
+`lua_package_path`.
+
+## `./nginx/Dockerfle`
+A Docker image build manifest. You may use this to run your own containers. Nginx configuration MUST be placed in 
+`/etc/nginx/conf.d`, and the WWW directory MUST exist at `/var/www/betty`.
+
+## `./nginx/nginx.conf`
+Your site's public nginx configuration file. You may deploy this anywhere. You MUST configure `lua_package_path`. If you
+are using HTTPS, you MUST configure SSL certificates.
