@@ -1,7 +1,7 @@
 from typing import Any, TYPE_CHECKING
 
 import pytest
-from betty.exception import UserFacingException
+from betty.exception import HumanFacingException
 from betty.test_utils.exception import raises_error
 
 from betty_nginx.config import NginxConfiguration
@@ -18,7 +18,7 @@ class TestNginxConfiguration:
 
     async def test_load__without_dict_should_error(self) -> None:
         dump = None
-        with raises_error(error_type=UserFacingException):
+        with raises_error(error_type=HumanFacingException):
             NginxConfiguration().load(dump)
 
     @pytest.mark.parametrize(
