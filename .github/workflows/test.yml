@@ -80,18 +80,17 @@ jobs:
         run: luarocks install busted
 
       - name: Build the development environment
-        run: ./bin/build-ci
-        shell: bash
+        run: ./bin/build-ci.py
 
       - name: Run the tests
         if: startsWith(runner.os, 'Linux')
-        run: ./bin/test
-        shell: bash
+        run: ./bin/test.py
 
       - name: Run the tests
         if: ${{ ! startsWith(runner.os, 'Linux') }}
-        run: BETTY_NGINX_TEST_SKIP_BUSTED=true BETTY_NGINX_TEST_SKIP_SHELLCHECK=true ./bin/test
-        shell: bash
+        run: ./bin/test.py
+        env:
+          BETTY_NGINX_TEST_SKIP_BUSTED: true
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v5
