@@ -9,7 +9,7 @@ from types import TracebackType
 from typing import cast, final
 
 import docker
-from betty.exception import UserFacingException
+from betty.exception import HumanFacingException
 from betty.locale.localizable import _
 from docker.models.containers import Container as DockerContainer
 
@@ -81,7 +81,7 @@ class Container:
 
     def _assert_artifacts_directory(self) -> None:
         if not self._artifacts_directory_path.is_dir():
-            raise UserFacingException(
+            raise HumanFacingException(
                 _(
                     "The nginx configuration has not been generated yet. Generate your site, and try again."
                 )
