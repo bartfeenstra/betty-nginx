@@ -7,8 +7,9 @@ import asyncio
 from typing import final, Self
 
 from betty.app import App
-from betty.app.factory import AppDependentFactory
-from betty.console.command import Command, CommandFunction, CommandDefinition
+from betty.app.factory import AppDependentSelfFactory
+from betty.console.command import Command, CommandFunction
+from betty.console.command import CommandPlugin
 from betty.console.project import add_project_argument
 from betty.locale.localizable import _
 from betty.project import Project
@@ -19,11 +20,8 @@ from betty_nginx.docker import Environment
 
 
 @final
-@CommandDefinition(
-    id="nginx-generate",
-    label=_("Generate nginx configuration"),
-)
-class NginxGenerate(AppDependentFactory, Command):
+@CommandPlugin("nginx-generate", label=_("Generate nginx configuration"))
+class NginxGenerate(AppDependentSelfFactory, Command):
     """
     Generate nginx configuration.
     """
@@ -47,11 +45,10 @@ class NginxGenerate(AppDependentFactory, Command):
 
 
 @final
-@CommandDefinition(
-    id="nginx-serve",
-    label=_("Serve a generated site with nginx in a Docker container."),
+@CommandPlugin(
+    "nginx-serve", label=_("Serve a generated site with nginx in a Docker container.")
 )
-class NginxServe(AppDependentFactory, Command):
+class NginxServe(AppDependentSelfFactory, Command):
     """
     A command to serve a generated site with nginx in a Docker container.
     """

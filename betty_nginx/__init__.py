@@ -4,17 +4,22 @@ import asyncio
 from asyncio import gather
 from pathlib import Path
 from shutil import copyfile
-from typing import final
+from typing import final, Self
 from urllib.parse import urlparse
 
 import aiofiles
 from aiofiles.os import makedirs
+from betty.config.factory import ConfigurationDependentSelfFactory
 from betty.job import Job
 from betty.job.scheduler import Scheduler
 from betty.locale.localizable import _, Plain
-from betty.project import ProjectContext
-from betty.project.extension import ConfigurableExtension, ExtensionDefinition
+from betty.project import ProjectContext, Project
+from betty.project.extension import ExtensionPlugin, Extension
+from betty.project.factory import CallbackProjectDependentFactory
+from betty.project.factory import ProjectDependentSelfFactory
 from betty.project.generate import Generator
+from betty.service.level.factory import AnyFactoryTarget
+from betty.typing import private
 from jinja2 import FileSystemLoader
 from typing_extensions import override
 
@@ -53,27 +58,52 @@ class GenerateArtifacts(Job[ProjectContext]):
 
 
 @final
-@ExtensionDefinition(
-    id="nginx",
+@ExtensionPlugin(
+    "nginx",
     label=Plain("Nginx"),
     description=_(
         "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
     ),
     assets_directory_path=Path(__file__).parent / "assets",
 )
-class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
+class Nginx(
+    Generator,
+    Extension,
+    ConfigurationDependentSelfFactory[NginxConfiguration],
+    ProjectDependentSelfFactory,
+):
     """
     Integrate Betty with nginx (and Docker).
     """
 
-    @override
-    async def generate(self, scheduler: Scheduler[ProjectContext]) -> None:
-        await scheduler.add(GenerateArtifacts())
+    @private
+    def __init__(
+        self, *, project: Project, configuration: NginxConfiguration | None = None
+    ):
+        super().__init__(
+            configuration=NginxConfiguration()
+            if configuration is None
+            else configuration
+        )
+        self._project = project
 
     @override
     @classmethod
-    def new_default_configuration(cls) -> NginxConfiguration:
-        return NginxConfiguration()
+    async def new_for_project(cls, project: Project, /) -> Self:
+        return cls(project=project)
+
+    @override
+    @classmethod
+    def new_for_configuration(
+        cls, configuration: NginxConfiguration
+    ) -> AnyFactoryTarget[Self]:
+        return CallbackProjectDependentFactory(
+            lambda project: cls(configuration=configuration, project=project)
+        )
+
+    @override
+    async def generate(self, scheduler: Scheduler[ProjectContext]) -> None:
+        await scheduler.add(GenerateArtifacts())
 
     @property
     def https(self) -> bool:
@@ -98,7 +128,7 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
         """
         The directory into which to generate the artifacts.
         """
-        return self.project.configuration.output_directory_path / "nginx"
+        return self._project.configuration.output_directory_path / "nginx"
 
     async def generate_artifacts(self) -> None:
         """
@@ -115,7 +145,7 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
         self, file_name: str, https: bool | None
     ) -> None:
         data = {
-            "server_name": urlparse(self.project.configuration.base_url).netloc,
+            "server_name": urlparse(self._project.configuration.base_url).netloc,
             "www_directory_path": self.www_directory_path,
             "https": https,
         }
@@ -125,7 +155,7 @@ class Nginx(Generator, ConfigurableExtension[NginxConfiguration]):
             .relative_to(root_path)
             .parts
         )
-        jinja2_environment = await self.project.jinja2_environment
+        jinja2_environment = await self._project.jinja2_environment
         template = FileSystemLoader(root_path).load(
             jinja2_environment,
             configuration_file_template_name,
