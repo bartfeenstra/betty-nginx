@@ -29,9 +29,7 @@ class TestDockerizedNginxServer:
             project.configuration.extensions.append(
                 PluginInstanceConfiguration(
                     Nginx,
-                    configuration=NginxConfiguration(
-                        www_directory_path="/var/www/betty"
-                    ),
+                    NginxConfiguration(www_directory_path="/var/www/betty"),
                 )
             )
             async with project:

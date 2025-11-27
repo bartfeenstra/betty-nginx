@@ -8,7 +8,8 @@ from typing import TypeAlias
 import html5lib
 import pytest
 from betty.app import App
-from betty.project import Project, ProjectSchema
+from betty.project import Project
+from betty.project.schema import ProjectSchema
 from betty.test_utils.conftest import *  # noqa F403
 from requests import Response
 

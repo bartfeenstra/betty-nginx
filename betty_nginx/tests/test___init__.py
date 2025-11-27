@@ -10,7 +10,7 @@ from betty.project.extension import Extension
 from betty.project.generate import generate
 from betty.test_utils.project.extension import (
     ExtensionTestBase,
-    ExtensionDefinitionTestBase,
+    ExtensionPluginTestBase,
 )
 from typing_extensions import override
 
@@ -18,7 +18,7 @@ from betty_nginx import Nginx
 from betty_nginx.config import NginxConfiguration
 
 
-class TestNginxDefinition(ExtensionDefinitionTestBase):
+class TestNginxDefinition(ExtensionPluginTestBase):
     @override
     @pytest.fixture
     def sut(self) -> PluginDefinition:
@@ -384,7 +384,7 @@ server {
             project.configuration.extensions.append(
                 PluginInstanceConfiguration(
                     Nginx,
-                    configuration=NginxConfiguration(
+                    NginxConfiguration(
                         www_directory_path="/tmp/overridden-www",
                     ),
                 )
