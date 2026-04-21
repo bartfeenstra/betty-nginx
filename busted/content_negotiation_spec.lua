@@ -1,4 +1,4 @@
-local cone = require('../betty_nginx/assets/content_negotiation')
+local cone = require('../betty_nginx/assets/nginx/content_negotiation')
 
 describe('negotiate', function ()
     it('nil header, with nil available, should not return', function ()

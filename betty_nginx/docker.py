@@ -10,7 +10,7 @@ from typing import cast, final
 
 import docker
 from betty.exception import HumanFacingException
-from betty.locale.localizable import _
+from betty.locale.localizable.gettext import _
 from docker.models.containers import Container as DockerContainer
 
 
@@ -24,6 +24,7 @@ class Environment(IntEnum):
     PUBLIC = 1
 
 
+@final
 class Container:
     """
     A Docker container with nginx, configured to serve a Betty site.
@@ -33,12 +34,13 @@ class Container:
 
     def __init__(
         self,
-        output_directory_path: Path,
+        output_directory: Path,
         /,
+        *,
         environment: Environment = Environment.LOCAL,
     ):
-        self._artifacts_directory_path = output_directory_path / "nginx"
-        self._www_directory_path = output_directory_path / "www"
+        self._artifacts_directory = output_directory / "nginx"
+        self._www_directory = output_directory / "www"
         self._environment = environment
         self._client = docker.from_env()
         self._docker_container: DockerContainer | None = None
@@ -63,7 +65,7 @@ class Container:
     def _start(self) -> None:
         self._assert_artifacts_directory()
         self._client.images.build(
-            path=str(self._artifacts_directory_path),
+            path=str(self._artifacts_directory),
             tag=self._IMAGE_TAG,
         )
         self._container.start()
@@ -80,7 +82,7 @@ class Container:
             self._container.stop()
 
     def _assert_artifacts_directory(self) -> None:
-        if not self._artifacts_directory_path.is_dir():
+        if not self._artifacts_directory.is_dir():
             raise HumanFacingException(
                 _(
                     "The nginx configuration has not been generated yet. Generate your site, and try again."
@@ -91,7 +93,7 @@ class Container:
     def _container(self) -> DockerContainer:
         if self._docker_container is None:
             self._assert_artifacts_directory()
-            nginx_configuration_file_path = self._artifacts_directory_path / (
+            nginx_configuration_file = self._artifacts_directory / (
                 ".nginx-local.conf"
                 if self._environment is Environment.LOCAL
                 else "nginx.conf"
@@ -102,11 +104,11 @@ class Container:
                 auto_remove=True,
                 detach=True,
                 volumes={
-                    nginx_configuration_file_path: {
+                    nginx_configuration_file: {
                         "bind": "/etc/nginx/conf.d/nginx.conf",
                         "mode": "ro",
                     },
-                    self._www_directory_path: {
+                    self._www_directory: {
                         "bind": "/var/www/betty",
                         "mode": "ro",
                     },

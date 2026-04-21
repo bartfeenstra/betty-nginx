@@ -10,16 +10,16 @@ add_header Vary Accept-Language;
 {% endif %}
 {% endmacro %}
 
-{% if project.extensions["nginx"].configuration.legacy_entity_redirects %}
+{% if legacy_entity_redirects %}
     map $uri $legacy_entity_redirect {
         default "none";
         {% set url_path_prefix -%}
-            {% if project.configuration.locales.multilingual -%}
-                /{{ project.configuration.locales.values() | map(attribute="alias") | join("|") }}
+            {% if project.multilingual -%}
+                /{{ project.locales | map(attribute="alias") | join("|") }}
             {%- endif %}
         {%- endset %}
-        {% for entity in project.ancestry if entity.plugin.public_facing %}
-            ~^({{ url_path_prefix }})?/{{ entity.plugin.id }}/{{ entity.id }}(\/.*)*$ $1/{{ entity.plugin.id }}/{{ entity.public_id }}$2;
+        {% for entity in project.ancestry if entity.plugin().public_facing %}
+            ~^({{ url_path_prefix }})?/{{ entity.plugin().id }}/{{ entity.id }}(\/.*)*$ $1/{{ entity.plugin().id }}/{{ entity.public_id }}$2;
         {% endfor %}
     }
 {% endif %}
@@ -33,7 +33,7 @@ add_header Vary Accept-Language;
 {% endif %}
 server {
     {{ headers(
-        debug=project.configuration.debug,
+        debug=project.debug,
         https=https
     ) }}
     {% if https %}
@@ -42,13 +42,13 @@ server {
 	    listen 80;
     {% endif %}
 	server_name {{ server_name }};
-	root {{ www_directory_path }};
+	root {{ www_directory }};
     gzip on;
     gzip_disable "msie6";
     gzip_vary on;
     gzip_types text/css application/javascript application/json application/xml;
 
-    {% if project.configuration.clean_urls %}
+    {% if project.clean_urls %}
         set_by_lua_block $media_type_extension {
             local available_media_types = {'text/html', 'application/json'}
             local media_type_extensions = {}
@@ -62,34 +62,34 @@ server {
     {% endif %}
     index index.$media_type_extension;
 
-    {% if project.extensions["nginx"].configuration.legacy_entity_redirects %}
+    {% if legacy_entity_redirects %}
         if ($legacy_entity_redirect != "none") {
             rewrite ^ $legacy_entity_redirect permanent;
         }
     {% endif %}
 
 
-    {% if project.configuration.locales.multilingual %}
+    {% if project.multilingual %}
         location @localized_redirect {
-            {% if project.configuration.clean_urls %}
+            {% if project.clean_urls %}
                 set_by_lua_block $locale_alias {
-                    local available_locales = {'{{ project.configuration.locales | map('to_language_tag') | join("', '") }}'}
+                    local available_locales = {'{{ project.locales | map(attribute='locale') | map('to_language_tag') | join("', '") }}'}
                     local locale_aliases = {}
-                    {% for locale_configuration in project.configuration.locales.values() %}
-                        locale_aliases['{{ locale_configuration.locale | to_language_tag }}'] = '{{ locale_configuration.alias }}'
+                    {% for project_locale in project.locales %}
+                        locale_aliases['{{ project_locale.locale | to_language_tag }}'] = '{{ project_locale.alias }}'
                     {% endfor %}
                     local locale = require('content_negotiation').negotiate(ngx.req.get_headers()['Accept-Language'], available_locales)
                     return locale_aliases[locale]
                 }
                 {{ headers(
-                    debug=project.configuration.debug,
+                    debug=project.debug,
                     https=https
                 ) }}
                 add_header Content-Language "$locale_alias" always;
 
                 return 307 /$locale_alias$uri;
             {% else %}
-                set $locale_alias {{ project.configuration.locales.default.alias }};
+                set $locale_alias {{ project.default_locale.alias }};
                 return 301 /$locale_alias$uri;
             {% endif %}
         }
@@ -102,11 +102,11 @@ server {
         }
 
         # Localized resources.
-        location ~* ^/({{ project.configuration.locales.values() | map(attribute='alias') | join('|') }})(/|$) {
+        location ~* ^/({{ project.locales | map(attribute='alias') | join('|') }})(/|$) {
             set $locale $1;
 
             {{ headers(
-                debug=project.configuration.debug,
+                debug=project.debug,
                 https=https
             ) }}
             add_header Content-Language "$locale" always;
@@ -125,10 +125,10 @@ server {
         # Static resources.
         location / {
             # Handle HTTP error responses.
-            error_page 401 /{{ project.configuration.locales.default.alias }}/.error/401.$media_type_extension;
-            error_page 403 /{{ project.configuration.locales.default.alias }}/.error/403.$media_type_extension;
-            error_page 404 /{{ project.configuration.locales.default.alias }}/.error/404.$media_type_extension;
-            location ~ ^/{{ project.configuration.locales.default.alias }}/\.error {
+            error_page 401 /{{ project.default_locale.alias }}/.error/401.$media_type_extension;
+            error_page 403 /{{ project.default_locale.alias }}/.error/403.$media_type_extension;
+            error_page 404 /{{ project.default_locale.alias }}/.error/404.$media_type_extension;
+            location ~ ^/{{ project.default_locale.alias }}/\.error {
                 internal;
             }
 

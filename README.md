@@ -16,7 +16,7 @@ extensions:
 ```
 
 ## ``https``
-(*optional*, **boolean**)
+(*optional*, **boolean**/**none**)
 
 Whether to support HTTPS in the public nginx configuration. Requires you to set up SSL certificates yourself.
 

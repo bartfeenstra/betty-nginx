@@ -4,7 +4,7 @@ Run pytest.
 """
 
 import sys
-from os import environ, path, getcwd
+from os import environ, getcwd, path
 from subprocess import check_call
 
 print("Running pytest...")  # noqa T201
