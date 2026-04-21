@@ -1,21 +1,29 @@
 # Translations template for Betty.
-# Copyright (C) 2025 Bart Feenstra & contributors
+# Copyright (C) 2026 Bart Feenstra & contributors
 # This file is distributed under the same license as the Betty project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Betty VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-10-29 12:50+0000\n"
+"POT-Creation-Date: 2026-04-22 23:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid ""
+"Generate configuration for a local environment. This disables HTTPS, for "
+"example."
+msgstr ""
+
+msgid "Generate configuration for a public hosting environment."
+msgstr ""
 
 msgid "Generate nginx configuration"
 msgstr ""
@@ -23,6 +31,12 @@ msgstr ""
 msgid ""
 "Generate nginx configuration for your site, as well as a Dockerfile to "
 "build a Docker container around it."
+msgstr ""
+
+msgid "Legacy entity redirects"
+msgstr ""
+
+msgid "Nginx configuration"
 msgstr ""
 
 msgid "Serve a generated site with nginx in a Docker container."
@@ -36,11 +50,6 @@ msgid ""
 "and try again."
 msgstr ""
 
-msgid ""
-"Whether to generate configuration for a local environment. This disables "
-"HTTPS, for example."
-msgstr ""
-
-msgid "Whether to generate configuration for a public hosting environment."
+msgid "WWW directory"
 msgstr ""
 

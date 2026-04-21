@@ -16,13 +16,11 @@ wheel_path = f"dist/betty_nginx-{VERSION}-py3-none-any.whl"
 venv_bin = "Scripts" if sys.platform.startswith("win32") else "bin"
 with TemporaryDirectory() as working_directory_path_str:
     check_call(["python", "-m", "virtualenv", "venv"], cwd=working_directory_path_str)
-    check_call(
-        [
-            path.join(working_directory_path_str, "venv", venv_bin, "pip"),
-            "install",
-            wheel_path,
-        ]
-    )
+    check_call([
+        path.join(working_directory_path_str, "venv", venv_bin, "pip"),
+        "install",
+        wheel_path,
+    ])
 
 # Remove any stale artifacts.
 check_call(["python", path.join("bin", "clean-build.py")])

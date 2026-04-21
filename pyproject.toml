@@ -13,10 +13,9 @@ license = {file = 'LICENSE.txt'}
 authors = [
   {name = 'Bart Feenstra', email = 'bar@bartfeenstra.com'},
 ]
-requires-python = '~= 3.11'
+requires-python = '~= 3.13'
 dependencies = [
-    'aiofiles ~= 25.1',
-    'betty == 0.5.0a20',
+    'betty == 0.5.0a36',
     'docker ~= 7.1',
 ]
 classifiers = [
@@ -26,8 +25,6 @@ classifiers = [
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     'Programming Language :: Lua',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3.14',
     'Programming Language :: Unix Shell',
@@ -49,15 +46,16 @@ classifiers = [
 
 [project.urls]
 Github = 'https://github.com/bartfeenstra/betty-nginx'
-Twitter = 'https://twitter.com/BettyProject'
-X = 'https://twitter.com/BettyProject'
+
+[project.entry-points.'betty.asset']
+'nginx' = 'betty_nginx.plugins.asset.nginx:NGINX'
 
 [project.entry-points.'betty.command']
-'nginx-generate' = 'betty_nginx._console:NginxGenerate.plugin'
-'nginx-serve' = 'betty_nginx._console:NginxServe.plugin'
+'nginx-generate' = 'betty_nginx.plugins.command.nginx_generate:NginxGenerate'
+'nginx-serve' = 'betty_nginx.plugins.command.nginx_serve:NginxServe'
 
 [project.entry-points.'betty.extension']
-'nginx' = 'betty_nginx:Nginx.plugin'
+'nginx' = 'betty_nginx.plugins.extension.nginx:Nginx'
 
 [project.optional-dependencies]
 setuptools = [
@@ -67,15 +65,15 @@ setuptools = [
 ]
 test = [
     'aioresponses ~= 0.7.8',
-    'basedmypy ~= 2.5',
     'coverage ~= 7.6',
-    'html5lib ~= 1.1',
+    'lxml ~= 6.0',
     'pytest ~= 9.0',
     'pytest-asyncio ~= 1.2',
     'pytest-mock ~= 3.14',
+    'requests ~= 2.32',
     'ruff ~= 0.8',
-    'types-aiofiles ~= 25.1',
-    'types-html5lib ~= 1.1',
+    'ty == 0.0.32',
+    'types-lxml >= 2026.2.16',
     'types-requests ~= 2.32',
     'virtualenv ~= 20.26',
     'betty_nginx[setuptools]',
