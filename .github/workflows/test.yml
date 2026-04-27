@@ -54,7 +54,7 @@ jobs:
 
       - name: Install Lua
         if: startsWith(runner.os, 'Linux')
-        uses: leafo/gh-actions-lua@v12
+        uses: leafo/gh-actions-lua@v13
 
       - name: Install LuaRocks
         if: startsWith(runner.os, 'Linux')
