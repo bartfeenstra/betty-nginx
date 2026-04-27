@@ -75,7 +75,7 @@ test = [
     'ty == 0.0.32',
     'types-lxml >= 2026.2.16',
     'types-requests ~= 2.32',
-    'virtualenv ~= 20.26',
+    'virtualenv >= 20.26,< 22.0',
     'betty_nginx[setuptools]',
 ]
 development = [
