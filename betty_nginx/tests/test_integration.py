@@ -7,7 +7,7 @@ import requests
 from betty.extension import ExtensionManufacturer
 from betty.functools import Do
 from betty.plugins.entity.place import Place
-from betty.project import Project, ProjectEntityType, ProjectLocale, generate
+from betty.project import Project, ProjectLocale, generate
 from betty.server import Server
 from betty.test_utils.conftest import IsolatedProjectFactory
 from requests import Response
@@ -224,14 +224,12 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                entity_types=[
-                    ProjectEntityType(entity_type=Place, generate_html_list=True)
-                ],
                 extensions=[
                     ExtensionManufacturer(
                         Nginx, NginxConfiguration(www_directory="/var/www/betty")
                     )
                 ],
+                generate_entity_list_html=[Place],
             ) as project,
             self.server(project) as server,
         ):
@@ -246,15 +244,13 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                entity_types=[
-                    ProjectEntityType(entity_type=Place, generate_html_list=True)
-                ],
+                clean_urls=True,
                 extensions=[
                     ExtensionManufacturer(
                         Nginx, NginxConfiguration(www_directory="/var/www/betty")
                     )
                 ],
-                clean_urls=True,
+                generate_entity_list_html=[Place],
             ) as project,
             self.server(project) as server,
         ):
