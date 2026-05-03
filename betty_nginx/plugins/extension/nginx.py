@@ -20,7 +20,7 @@ from betty.project.generate import Generator
 
 from betty_nginx.data import NginxConfiguration
 from betty_nginx.jobs import GenerateArtifacts
-from betty_nginx.plugins.asset.nginx import NGINX
+from betty_nginx.plugins.asset_directory.nginx import NGINX
 
 if TYPE_CHECKING:
     from betty.job import Scheduler
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     description=_(
         "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
     ),
-    requires=[Project.assets.require(NGINX)],
+    requires=[Project.asset_directories.require(NGINX)],
 )
 class Nginx(
     Generator, Extension, DataManufacturable[NginxConfiguration], Manufacturable

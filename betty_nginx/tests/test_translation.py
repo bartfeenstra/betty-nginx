@@ -7,12 +7,12 @@ from betty.locale.translation import update_translations
 from betty.test_utils.locale import PotFileTestBase
 from betty.user.no_op import NoOpUser
 
-from betty_nginx.plugins.asset.nginx import NGINX
+from betty_nginx.plugins.asset_directory.nginx import NGINX
 
 
 class TestPotFile(PotFileTestBase):
     @override
-    def assets_directory_path(self) -> Path:
+    def asset_directory(self) -> Path:
         return NGINX.assets
 
     @override

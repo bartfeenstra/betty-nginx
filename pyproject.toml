@@ -15,7 +15,7 @@ authors = [
 ]
 requires-python = '~= 3.13'
 dependencies = [
-    'betty == 0.5.0a36',
+    'betty == 0.5.0a37',
     'docker ~= 7.1',
 ]
 classifiers = [
@@ -47,8 +47,8 @@ classifiers = [
 [project.urls]
 Github = 'https://github.com/bartfeenstra/betty-nginx'
 
-[project.entry-points.'betty.asset']
-'nginx' = 'betty_nginx.plugins.asset.nginx:NGINX'
+[project.entry-points.'betty.asset_directory']
+'nginx' = 'betty_nginx.plugins.asset_directory.nginx:NGINX'
 
 [project.entry-points.'betty.command']
 'nginx-generate' = 'betty_nginx.plugins.command.nginx_generate:NginxGenerate'
