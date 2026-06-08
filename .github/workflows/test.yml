@@ -78,6 +78,6 @@ jobs:
           BETTY_NGINX_TEST_SKIP_BUSTED: true
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
