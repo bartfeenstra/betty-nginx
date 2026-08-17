@@ -72,7 +72,7 @@ test = [
     'pytest-mock ~= 3.14',
     'requests ~= 2.32',
     'ruff ~= 0.8',
-    'ty == 0.0.32',
+    'ty == 0.0.71',
     'types-lxml >= 2026.2.16',
     'types-requests ~= 2.32',
     'virtualenv ~= 21.3',
