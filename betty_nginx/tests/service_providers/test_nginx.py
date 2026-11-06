@@ -1,19 +1,79 @@
 import re
 
-from betty.extension import ExtensionManufacturer
+import pytest
+from betty.exception import HumanFacingException
 from betty.project import Project, ProjectLocale
 from betty.project.generate import generate
+from betty.service_provider import ServiceProviderManufacturer
 from betty.test_utils.conftest import IsolatedProjectFactory
 
-from betty_nginx.data import NginxConfiguration
-from betty_nginx.plugins.extension.nginx import Nginx
+from betty_nginx.service_providers.nginx import Nginx, NginxConfig
+
+
+class TestNginxConfig:
+    async def test_load__minimal(self) -> None:
+        NginxConfig.definition().porter.load({})
+
+    async def test_load__without_dict_should_error(self) -> None:
+        with pytest.raises(HumanFacingException):
+            NginxConfig.definition().porter.load(None)
+
+    @pytest.mark.parametrize(
+        "https",
+        [
+            None,
+            True,
+            False,
+        ],
+    )
+    async def test_load__with_https(self, https: bool | None) -> None:
+        sut = NginxConfig.definition().porter.load({
+            "https": https,
+        })
+        assert sut.https == https
+
+    async def test_load__with_legacy_entity_redirects(self) -> None:
+        sut = NginxConfig.definition().porter.load({
+            "legacy_entity_redirects": True,
+        })
+        assert sut.legacy_entity_redirects
+
+    async def test_load__with_www_directory(self) -> None:
+        www_directory = "/var/www"
+        sut = NginxConfig.definition().porter.load({
+            "www_directory": www_directory,
+        })
+        assert sut.www_directory == www_directory
+
+    async def test_dump__minimal(self) -> None:
+        sut = NginxConfig()
+        assert sut.definition().porter.dump(sut) == {}
+
+    async def test_dump__with_https(self) -> None:
+        sut = NginxConfig(https=True)
+        assert sut.definition().porter.dump(sut) == {
+            "https": True,
+        }
+
+    async def test_dump__with_legacy_entity_redirects(self) -> None:
+        sut = NginxConfig(legacy_entity_redirects=True)
+        assert sut.definition().porter.dump(sut) == {
+            "legacy_entity_redirects": True,
+        }
+
+    async def test_dump__with_www_directory(self) -> None:
+        www_directory = "/var/www"
+        sut = NginxConfig(www_directory=www_directory)
+        assert sut.definition().porter.dump(sut) == {
+            "www_directory": www_directory,
+        }
 
 
 class TestNginx:
     async def test_generate(
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
-        async with isolated_project_factory(extensions=[Nginx]) as project:
+        async with isolated_project_factory(service_providers=[Nginx]) as project:
             await generate(project)
             assert (project.output_directory / "nginx").exists()
 
@@ -36,7 +96,7 @@ class TestNginx:
     async def _assert_configuration_equals(
         self, expected: str, project: Project
     ) -> None:
-        await (await project.extensions[Nginx]).generate_artifacts()
+        await (await project.service_providers[Nginx]).generate_artifacts()
         with open(
             project.output_directory / "nginx" / "nginx.conf", encoding="utf-8"
         ) as f:
@@ -49,7 +109,7 @@ class TestNginx:
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
         async with isolated_project_factory(
-            extensions=[Nginx],
+            service_providers=[Nginx],
             url="http://example.com",
         ) as project:
             expected = rf"""
@@ -86,7 +146,7 @@ server {{
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
         async with isolated_project_factory(
-            extensions=[Nginx],
+            service_providers=[Nginx],
             locales=[
                 ProjectLocale(
                     "en-US",
@@ -165,7 +225,7 @@ server {{
     ) -> None:
         async with isolated_project_factory(
             clean_urls=True,
-            extensions=[Nginx],
+            service_providers=[Nginx],
             locales=[
                 ProjectLocale(
                     "en-US",
@@ -260,7 +320,7 @@ server {{
     ) -> None:
         async with isolated_project_factory(
             clean_urls=True,
-            extensions=[Nginx],
+            service_providers=[Nginx],
             url="http://example.com",
         ) as project:
             expected = rf"""
@@ -303,7 +363,7 @@ server {{
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
         async with isolated_project_factory(
-            extensions=[Nginx],
+            service_providers=[Nginx],
             url="https://example.com",
         ) as project:
             expected = rf"""
@@ -346,10 +406,10 @@ server {{
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
         async with isolated_project_factory(
-            extensions=[
-                ExtensionManufacturer(
+            service_providers=[
+                ServiceProviderManufacturer(
                     Nginx,
-                    NginxConfiguration(
+                    NginxConfig(
                         www_directory="/tmp/overridden-www",
                     ),
                 )
@@ -395,8 +455,8 @@ server {
     async def test_generate_artifacts__dockerfile(
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
-        async with isolated_project_factory(extensions=[Nginx]) as project:
-            await (await project.extensions[Nginx]).generate_artifacts()
+        async with isolated_project_factory(service_providers=[Nginx]) as project:
+            await (await project.service_providers[Nginx]).generate_artifacts()
             assert (
                 project.output_directory / "nginx" / "content_negotiation.lua"
             ).exists()
@@ -404,6 +464,6 @@ server {
     async def test_generate_artifacts__content_negotiation(
         self, isolated_project_factory: IsolatedProjectFactory
     ) -> None:
-        async with isolated_project_factory(extensions=[Nginx]) as project:
-            await (await project.extensions[Nginx]).generate_artifacts()
+        async with isolated_project_factory(service_providers=[Nginx]) as project:
+            await (await project.service_providers[Nginx]).generate_artifacts()
             assert (project.output_directory / "nginx" / "Dockerfile").exists()

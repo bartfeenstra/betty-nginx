@@ -4,17 +4,16 @@ from contextlib import asynccontextmanager
 
 import pytest
 import requests
-from betty.extension import ExtensionManufacturer
+from betty.entities.place import Place
 from betty.functools import Do
-from betty.plugins.entity.place import Place
 from betty.project import Project, ProjectLocale, generate
 from betty.server import Server
+from betty.service_provider import ServiceProviderManufacturer
 from betty.test_utils.conftest import IsolatedProjectFactory
 from requests import Response
 
-from betty_nginx.data import NginxConfiguration
-from betty_nginx.plugins.extension.nginx import Nginx
-from betty_nginx.serve import DockerizedNginxServer
+from betty_nginx.servers.dockerized import DockerizedServer
+from betty_nginx.service_providers.nginx import Nginx, NginxConfig
 from betty_nginx.tests.conftest import AssertBettyHtml, AssertBettyJson
 
 
@@ -26,7 +25,7 @@ class TestNginx:
     @asynccontextmanager
     async def server(self, project: Project) -> AsyncIterator[Server]:
         await generate.generate(project)
-        async with DockerizedNginxServer(project) as server:
+        async with DockerizedServer(project) as server:
             yield server
 
     def _build_assert_status_code(
@@ -44,9 +43,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ]
             ) as project,
@@ -63,9 +62,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ]
             ) as project,
@@ -83,9 +82,9 @@ class TestNginx:
         async with (
             isolated_project_factory(
                 clean_urls=True,
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
             ) as project,
@@ -112,9 +111,9 @@ class TestNginx:
 
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -138,9 +137,9 @@ class TestNginx:
 
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -168,9 +167,9 @@ class TestNginx:
         async with (
             isolated_project_factory(
                 clean_urls=True,
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -196,9 +195,9 @@ class TestNginx:
         async with (
             isolated_project_factory(
                 clean_urls=True,
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -224,9 +223,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 generate_entity_list_html=[Place],
@@ -245,9 +244,9 @@ class TestNginx:
         async with (
             isolated_project_factory(
                 clean_urls=True,
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 generate_entity_list_html=[Place],
@@ -269,9 +268,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 clean_urls=True,
@@ -293,9 +292,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -316,9 +315,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -344,9 +343,9 @@ class TestNginx:
     ) -> None:
         async with (
             isolated_project_factory(
-                extensions=[
-                    ExtensionManufacturer(
-                        Nginx, NginxConfiguration(www_directory="/var/www/betty")
+                service_providers=[
+                    ServiceProviderManufacturer(
+                        Nginx, NginxConfig(www_directory="/var/www/betty")
                     )
                 ],
                 locales=[
@@ -371,10 +370,10 @@ class TestNginx:
         isolated_project_factory: IsolatedProjectFactory,
     ) -> None:
         async with isolated_project_factory(
-            extensions=[
-                ExtensionManufacturer(
+            service_providers=[
+                ServiceProviderManufacturer(
                     Nginx,
-                    NginxConfiguration(
+                    NginxConfig(
                         legacy_entity_redirects=True, www_directory="/var/www/betty"
                     ),
                 )
@@ -385,7 +384,7 @@ class TestNginx:
             async with self.server(project) as server:
                 await Do(
                     requests.get,
-                    f"{server.public_url}/{entity.plugin().id}/{entity.id}/index.html",
+                    f"{server.public_url}/{entity.definition().id}/{entity.id}/index.html",
                 ).until(self._build_assert_status_code(200), assert_betty_html)
 
     async def test_legacy_entity_redirects__multilingual(
@@ -394,10 +393,10 @@ class TestNginx:
         isolated_project_factory: IsolatedProjectFactory,
     ) -> None:
         async with isolated_project_factory(
-            extensions=[
-                ExtensionManufacturer(
+            service_providers=[
+                ServiceProviderManufacturer(
                     Nginx,
-                    NginxConfiguration(
+                    NginxConfig(
                         legacy_entity_redirects=True, www_directory="/var/www/betty"
                     ),
                 )
@@ -412,5 +411,5 @@ class TestNginx:
             async with self.server(project) as server:
                 await Do(
                     requests.get,
-                    f"{server.public_url}/en/{entity.plugin().id}/{entity.id}/index.html",
+                    f"{server.public_url}/en/{entity.definition().id}/{entity.id}/index.html",
                 ).until(self._build_assert_status_code(200), assert_betty_html)

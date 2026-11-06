@@ -7,16 +7,17 @@ from typing import final, override
 
 import docker
 from aiofiles.os import makedirs
-from betty.locale.localizable.gettext import _
+from betty.localizables.gettext import _
 from betty.project import Project
 from betty.server import Server, ServerNotStarted
+from betty.user import Severity
 from docker.errors import DockerException
 
 from betty_nginx.docker import Container, Environment
 
 
 @final
-class DockerizedNginxServer(Server):
+class DockerizedServer(Server):
     """
     An nginx server that runs within a Docker container.
     """
@@ -24,14 +25,16 @@ class DockerizedNginxServer(Server):
     def __init__(
         self, project: Project, /, *, environment: Environment = Environment.LOCAL
     ) -> None:
-        super().__init__(user=project.upstream.user)
+        super().__init__(ui=project.upstream.ui)
         self._project = project
         self._environment = environment
         self._container: Container | None = None
 
     @override
     async def start(self) -> None:
-        await self._user.message_debug(_("Starting a Dockerized nginx web server..."))
+        await self._ui.message(
+            _("Starting a Dockerized nginx web server..."), Severity.DEBUG
+        )
 
         await makedirs(self._project.www_directory, exist_ok=True)
 

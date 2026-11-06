@@ -6,14 +6,13 @@ import argparse
 from typing import Self, final, override
 
 from betty.app import App
-from betty.console import CommandDefinition, CommandFunction
-from betty.console.command import Command
-from betty.console.project import add_project_argument
+from betty.commands.project import add_project_argument
+from betty.console import Command, CommandDefinition, CommandFunction
 from betty.factory import Manufacturable
-from betty.locale.localizable.gettext import _
+from betty.localizables.gettext import _
 from betty.project import Project
 
-from betty_nginx.plugins.extension.nginx import Nginx
+from betty_nginx.service_providers.nginx import Nginx
 
 
 @final
@@ -38,4 +37,4 @@ class NginxGenerate(Manufacturable, Command):
 
     async def _command_function(self, project: Project) -> None:
         async with project:
-            await (await project.extensions[Nginx]).generate_artifacts()
+            await (await project.service_providers[Nginx]).generate_artifacts()
