@@ -11,32 +11,88 @@ from typing import TYPE_CHECKING, Self, final, override
 from urllib.parse import urlparse
 
 from aiofiles.os import makedirs
-from betty.extension import Extension, ExtensionDefinition
+from betty.attrs.owner import OwnerAttr
+from betty.data import Data
+from betty.datas.aggregate.record.object import ObjectDefinition
+from betty.datas.bool import BoolDefinition
+from betty.datas.str import StrDefinition
 from betty.factory import DataManufacturable, Manufacturable
 from betty.file import write
-from betty.locale.localizable.gettext import _
+from betty.localizables.gettext import _
 from betty.project import Project
 from betty.project.generate import Generator
+from betty.service_provider import ServiceProvider, ServiceProviderDefinition
 
-from betty_nginx.data import NginxConfiguration
-from betty_nginx.jobs import GenerateArtifacts
-from betty_nginx.plugins.asset_directory.nginx import NGINX
+from betty_nginx.asset_directories import nginx
+from betty_nginx.jobs.jobs import GenerateArtifacts
 
 if TYPE_CHECKING:
     from betty.job import Scheduler
 
 
 @final
-@ExtensionDefinition(
+@ObjectDefinition(
+    label=_("Nginx configuration"),
+)
+class NginxConfig(Data):
+    """
+    Provide configuration for the :py:class:`betty_nginx.Nginx` extension.
+    """
+
+    https = OwnerAttr(
+        BoolDefinition(label="HTTPS"),
+        omit_load=True,
+        omit_dump=lambda data: data is None,
+    ).optional
+    """
+    Whether the nginx server should use HTTPS.
+
+    ``True`` to use HTTPS (and HTTP/2), ``False`` to use HTTP (and HTTP 1), ``None`` to let this behavior depend on 
+    whether the project's URL uses HTTPS or not.
+    """
+
+    legacy_entity_redirects = OwnerAttr(
+        BoolDefinition(label=_("Legacy entity redirects")),
+        omit_load=True,
+        omit_dump=lambda data: data is False,
+    )
+    """
+    Whether to generate redirects from legacy (pre Betty 0.5) entity URLs.
+    """
+
+    www_directory = OwnerAttr(
+        StrDefinition(label=_("WWW directory")),
+        omit_load=True,
+        omit_dump=lambda data: data is None,
+    ).optional
+    """
+    The nginx server's public web root directory path.
+    """
+
+    def __init__(
+        self,
+        *,
+        www_directory: str | None = None,
+        https: bool | None = None,
+        legacy_entity_redirects: bool = False,
+    ):
+        super().__init__()
+        self.https = https
+        self.www_directory = www_directory
+        self.legacy_entity_redirects = legacy_entity_redirects
+
+
+@final
+@ServiceProviderDefinition(
     "nginx",
     label="Nginx",
     description=_(
         "Generate nginx configuration for your site, as well as a Dockerfile to build a Docker container around it."
     ),
-    requires=[Project.asset_directories.require(NGINX)],
+    requires=[Project.asset_directories.require(nginx)],
 )
 class Nginx(
-    Generator, Extension, DataManufacturable[NginxConfiguration], Manufacturable
+    Generator, ServiceProvider, DataManufacturable[NginxConfig], Manufacturable
 ):
     """
     Integrate Betty with nginx (and Docker).
@@ -59,15 +115,13 @@ class Nginx(
 
     @override
     @classmethod
-    def new_data_cls(cls) -> type[NginxConfiguration]:
-        return NginxConfiguration
+    def new_data_cls(cls) -> type[NginxConfig]:
+        return NginxConfig
 
     @override
     @Project.require
     @classmethod
-    async def new(
-        cls, project: Project, data: NginxConfiguration | None = None, /
-    ) -> Self:
+    async def new(cls, project: Project, data: NginxConfig | None = None, /) -> Self:
         return cls(
             https=data.https if data else None,
             legacy_entity_redirects=data.legacy_entity_redirects if data else False,
@@ -111,7 +165,7 @@ class Nginx(
         await makedirs(self._artifacts_directory, exist_ok=True)
         await asyncio.to_thread(
             copyfile,
-            NGINX.assets / "nginx" / "Dockerfile",
+            nginx.assets / "nginx" / "Dockerfile",
             self._artifacts_directory / "Dockerfile",
         )
 
@@ -119,6 +173,6 @@ class Nginx(
         await makedirs(self._artifacts_directory, exist_ok=True)
         await asyncio.to_thread(
             copyfile,
-            NGINX.assets / "nginx" / "content_negotiation.lua",
+            nginx.assets / "nginx" / "content_negotiation.lua",
             self._artifacts_directory / "content_negotiation.lua",
         )

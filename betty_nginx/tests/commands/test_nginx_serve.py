@@ -2,14 +2,14 @@ from json import dumps
 from pathlib import Path
 
 from betty.app import App
-from betty.console import SystemExitCode
 from betty.file import write
-from betty.project.data import ProjectConfiguration
+from betty.project import ProjectData
+from betty.servers.no_op import NoOpServer
+from betty.sys import ExitCode
 from betty.test_utils.console import run
-from betty.test_utils.server import NoOpServer
 from pytest_mock import MockerFixture
 
-from betty_nginx.plugins.extension.nginx import Nginx
+from betty_nginx.service_providers.nginx import Nginx
 
 
 class TestNginxServe:
@@ -17,16 +17,17 @@ class TestNginxServe:
         self, isolated_app: App, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         mocker.patch(
-            "betty_nginx.plugins.command.nginx_serve.NginxServe._wait_forever",
+            "betty_nginx.commands.nginx_serve.NginxServe._wait_forever",
             side_effect=KeyboardInterrupt,
         )
-        mocker.patch("betty_nginx.serve.DockerizedNginxServer", new=NoOpServer)
+        mocker.patch("betty_nginx.servers.dockerized.DockerizedServer", new=NoOpServer)
         configuration_file = tmp_path / "betty.json"
-        configuration = ProjectConfiguration(
-            extensions=[Nginx], title="Betty", url="https://example.com"
+        configuration = ProjectData(
+            service_providers=[Nginx], title="Betty", url="https://example.com"
         )
         await write(
-            configuration_file, dumps(configuration.data().porter.dump(configuration))
+            configuration_file,
+            dumps(configuration.definition().porter.dump(configuration)),
         )
         (configuration_file.parent / "output" / "www").mkdir(parents=True)
         await run(
@@ -34,5 +35,5 @@ class TestNginxServe:
             "nginx-serve",
             "-p",
             str(configuration_file),
-            expected_exit_code=SystemExitCode.USER_QUIT,
+            expected_exit_code=ExitCode.USER_QUIT,
         )

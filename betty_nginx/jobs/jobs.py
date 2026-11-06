@@ -11,7 +11,7 @@ from betty.job import Job
 if TYPE_CHECKING:
     from betty.job.scheduler import Scheduler
 
-    from betty_nginx.plugins.extension.nginx import Nginx
+    from betty_nginx.service_providers.nginx import Nginx
 
 
 @final

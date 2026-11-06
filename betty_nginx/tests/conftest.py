@@ -5,8 +5,6 @@ Pytest configuration.
 from collections.abc import Awaitable, Callable
 
 import pytest
-from betty.project import Project
-from betty.project.schema import ProjectSchema
 from betty.test_utils.conftest import *  # noqa F403
 from lxml.etree import ParserError
 from lxml.html import document_fromstring
@@ -29,14 +27,3 @@ async def assert_betty_html() -> AssertBettyHtml:
         assert "Betty" in response.text
 
     return _assert_betty_html
-
-
-@pytest.fixture
-async def assert_betty_json(isolated_project: Project) -> AssertBettyJson:
-    async def _assert_betty_json(response: Response) -> None:
-        assert response.headers["Content-Type"] == "application/json"
-        data = response.json()
-        schema = await ProjectSchema.new(isolated_project)
-        schema.validate(data)
-
-    return _assert_betty_json

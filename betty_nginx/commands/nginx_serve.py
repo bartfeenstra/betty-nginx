@@ -7,15 +7,14 @@ import asyncio
 from typing import Self, final, override
 
 from betty.app import App
-from betty.console import CommandDefinition, CommandFunction
-from betty.console.command import Command
-from betty.console.project import add_project_argument
+from betty.commands.project import add_project_argument
+from betty.console import Command, CommandDefinition, CommandFunction
 from betty.factory import Manufacturable
-from betty.locale.localizable.gettext import _
+from betty.localizables.gettext import _
 from betty.project import Project
 
-from betty_nginx import serve
 from betty_nginx.docker import Environment
+from betty_nginx.servers import dockerized
 
 
 @final
@@ -38,7 +37,6 @@ class NginxServe(Manufacturable, Command):
 
     @override
     async def configure(self, parser: argparse.ArgumentParser) -> CommandFunction:
-        localizer = await self._app.localizer
         command_function = await add_project_argument(
             parser, self._command_function, self._app
         )
@@ -48,7 +46,7 @@ class NginxServe(Manufacturable, Command):
             dest="environment",
             action="store_const",
             const=Environment.LOCAL,
-            help=localizer._(
+            help=self._app.ui.localizer.translate._(
                 "Generate configuration for a local environment. This disables HTTPS, for example."
             ),
         )
@@ -57,7 +55,7 @@ class NginxServe(Manufacturable, Command):
             dest="environment",
             action="store_const",
             const=Environment.PUBLIC,
-            help=localizer._(
+            help=self._app.ui.localizer.translate._(
                 "Generate configuration for a public hosting environment."
             ),
         )
@@ -68,7 +66,7 @@ class NginxServe(Manufacturable, Command):
     ) -> None:
         async with (
             project,
-            serve.DockerizedNginxServer(project, environment=environment) as server,
+            dockerized.DockerizedServer(project, environment=environment) as server,
         ):
             await server.show()
             await self._wait_forever()

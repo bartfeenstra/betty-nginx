@@ -15,8 +15,8 @@ authors = [
 ]
 requires-python = '~= 3.13'
 dependencies = [
-    'betty == 0.5.0a37',
-    'docker ~= 7.1',
+    'betty == 0.5.0a53',
+    'docker ~= 7.2',
 ]
 classifiers = [
     'Environment :: Console',
@@ -63,28 +63,20 @@ setuptools = [
     'twine ~= 6.0',
     'wheel ~= 0.47',
 ]
-test = [
+dev = [
     'aioresponses ~= 0.7.8',
     'coverage ~= 7.6',
-    'lxml ~= 6.0',
+    'lxml ~= 7.0.0b1',
     'pytest ~= 9.0',
     'pytest-asyncio ~= 1.2',
     'pytest-mock ~= 3.14',
     'requests ~= 2.32',
-    'ruff ~= 0.8',
-    'ty == 0.0.32',
+    'ruff ~= 0.17.0',
+    'ty == 0.0.98',
     'types-lxml >= 2026.2.16',
     'types-requests ~= 2.32',
     'virtualenv ~= 21.3',
     'betty_nginx[setuptools]',
-]
-development = [
-    'pytest-repeat ~= 0.9',
-    'betty_nginx[test]',
-]
-ci = [
-    'codecov ~= 2.1',
-    'betty_nginx[test]',
 ]
 
 [tool.setuptools.packages.find]

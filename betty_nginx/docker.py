@@ -10,7 +10,7 @@ from typing import cast, final
 
 import docker
 from betty.exception import HumanFacingException
-from betty.locale.localizable.gettext import _
+from betty.localizables.gettext import _
 from docker.models.containers import Container as DockerContainer
 
 
